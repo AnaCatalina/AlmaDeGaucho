@@ -6,7 +6,7 @@ using UnityEngine.AI;
 public class IndianBehaviourScript : EnemyBehaviourScript
 {
     private Transform player;
-    public float detectionRadius = 20f;
+    public float detectionRadius = 10.0f;
     public float attackRadius = 2f; // rango de ataque
     public float stopDistance = 3f; // distancia a la que se detendrá antes de atacar
     public float attackDamage = 10f; // daño
@@ -16,6 +16,9 @@ public class IndianBehaviourScript : EnemyBehaviourScript
 
     private bool isAttacking = false;
     private float lastAttackTime;
+
+    public Transform[] pointsPatrol;
+    private int currentPosition;
 
     // Start is called before the first frame update
     protected override void Start()
@@ -32,6 +35,11 @@ public class IndianBehaviourScript : EnemyBehaviourScript
         }
         animator = GetComponent<Animator>(); 
         ataco = false;
+
+        currentPosition = Random.Range(0, pointsPatrol.Length);
+        animator.SetBool("isMove", true);
+        agent.isStopped = false;
+        agent.SetDestination(pointsPatrol[currentPosition].transform.position);
     }
 
     // Update is called once per frame
@@ -40,6 +48,14 @@ public class IndianBehaviourScript : EnemyBehaviourScript
         if (player == null || agent == null)
         {
             return;
+        }
+
+        if (agent.remainingDistance < 0.1) //este if lo agrege recien
+        {
+            currentPosition = Random.Range(0, pointsPatrol.Length);
+            animator.SetBool("isMove", true);
+            agent.isStopped = false;
+            agent.SetDestination(pointsPatrol[currentPosition].position);
         }
 
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
@@ -53,7 +69,7 @@ public class IndianBehaviourScript : EnemyBehaviourScript
         }
         else if (distanceToPlayer <= stopDistance)// se detiene a cierta distancia del jugador y ataca
         {
-            agent.isStopped = true;
+            agent.isStopped = true; 
             if (distanceToPlayer <= attackRadius && !ataco/*&& !isAttacking*/)
             {
                 ataco = true;
@@ -67,8 +83,10 @@ public class IndianBehaviourScript : EnemyBehaviourScript
         {
             // se detiene si el jugador está fuera del rango de detección
             isAttacking = false;
-            agent.isStopped = true;
-            animator.SetBool("isMove", false);
+            //agent.isStopped = true;  
+            //animator.SetBool("isMove", false);
+            animator.SetBool("isMove", true);
+            agent.SetDestination(pointsPatrol[currentPosition].position); //esto tambien lo agrege recien
         }
         animator.SetBool("attack", isAttacking);
     }
