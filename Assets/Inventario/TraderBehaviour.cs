@@ -12,6 +12,8 @@ public class TraderBehaviour : MonoBehaviour
     private InventoryItems inventoryItems;
     public GameObject panelSell;
     public bool enTienda;
+
+    public GameObject panelText;
     // Start is called before the first frame update
     void Start()
     {
@@ -24,17 +26,21 @@ public class TraderBehaviour : MonoBehaviour
     void Update()
     {
         distance = Vector3.Distance(player.transform.position, transform.position);
-        if(distance <= 3.0f && !buy)
+        panelText.SetActive(distance <= 3.0f && !buy);
+        if(distance <= 3.0f && Input.GetKeyDown(KeyCode.F))
         {
             enTienda=true;
             panel.SetActive(true);
+            panelText.SetActive(false);
+            buy=true;
             Cursor.lockState = CursorLockMode.None;
             Cursor.visible = true;
         }
-        else
+
+        /*else
         {
             enTienda = false;
-            panel.SetActive(false);
+            //panel.SetActive(false);
 
         }
 
@@ -45,13 +51,13 @@ public class TraderBehaviour : MonoBehaviour
         if (enTienda && Input.GetKeyDown(KeyCode.V))
         {
             SellItems();
-        }
+        }*/
 
     }
 
     public void BuyItems()
     {
-        //panel.SetActive(false);
+        panel.SetActive(false);
         buy = true;
         panelBuy.SetActive(true);
     }
@@ -94,7 +100,7 @@ public class TraderBehaviour : MonoBehaviour
 
     public void SellItems()
     {
-        //panel.SetActive(false);
+        panel.SetActive(false);
         buy = true;
         panelSell.SetActive(true);
     }
@@ -133,6 +139,12 @@ public class TraderBehaviour : MonoBehaviour
             
         }  
 
+    }
+
+    public void ClosePanel()
+    {
+        panel.SetActive(false);
+        buy = false;
     }
 
 
