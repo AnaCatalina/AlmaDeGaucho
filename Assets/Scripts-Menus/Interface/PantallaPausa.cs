@@ -7,6 +7,9 @@ public class PantallaPausa : MonoBehaviour
 {
     public GameObject ObjetoMenuPausa;
     public bool Pausa = false;
+    public GameObject GrupoSalir;
+    public GameObject GrupoInformacion;
+    public GameObject GrupoOpciones;
 
     // Start is called before the first frame update
     void Start()
@@ -40,6 +43,9 @@ public class PantallaPausa : MonoBehaviour
     public void Resumir()
     {
         ObjetoMenuPausa.SetActive(false);
+        GrupoSalir.SetActive(false);
+        GrupoInformacion.SetActive(false);
+        GrupoOpciones.SetActive(false);
         Pausa = false;
 
         Time.timeScale = 1;
