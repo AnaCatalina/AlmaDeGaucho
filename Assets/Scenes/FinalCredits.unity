@@ -248,7 +248,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: -1137.5002}
+  m_AnchoredPosition: {x: 0, y: -1151}
   m_SizeDelta: {x: 499.99976, y: 2624.9995}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &71395060
@@ -284,11 +284,11 @@ MonoBehaviour:
     Catalina Boccardo\r\nRafael Ismael P\xE9rez Fascio\r\n\r\n\nControl de Calidad
     (QA)\r\nTodo el equipo\r\n\n\r\nSoporte T\xE9cnico\r\nNelson Ariel Sagrero\r\nRafael
     Ismael P\xE9rez Fascio\r\nJos\xE9 Luis M\xE1rquez\r\n\n\r\nAgradecimientos Especiales\r\nA
-    Martinez LLosco Lucas Alberto Rafael\nA Miguel Angel Zenteno\nA nuestras familias
-    y amigos por el constante apoyo\r\nA nuestros profesores y mentores por su gu\xEDa\r\nA
-    todos los que nos inspiraron a seguir creando\r\n\r\n\nHerramientas Utilizadas\r\nUnity
-    (Desarrollo del juego)\r\nBlender (Modelado y animaci\xF3n)\r\nPhotoshop y Paint
-    Tool Sai (Dise\xF1o gr\xE1fico)\r\nAudacity (Edici\xF3n de sonido)\r\nGitHub
+    Guillermo Arostegui\nA Martinez LLosco Lucas Alberto Rafael\nA Miguel Angel Zenteno\nA
+    nuestras familias y amigos por el constante apoyo\r\nA nuestros profesores y
+    mentores por su gu\xEDa\r\nA todos los que nos inspiraron a seguir creando\r\n\r\n\nHerramientas
+    Utilizadas\r\nUnity (Desarrollo del juego)\r\nBlender (Modelado y animaci\xF3n)\r\nPhotoshop
+    y Paint Tool Sai (Dise\xF1o gr\xE1fico)\r\nAudacity (Edici\xF3n de sonido)\r\nGitHub
     (Control de versiones)\r\nTrello (Organizaci\xF3n y gesti\xF3n de tareas)\r\n\r\n\nInspiraci\xF3n\r\nInspirado
     en el libro Mart\xEDn Fierro por Jos\xE9 Hern\xE1ndez\r\n\n\r\nDedicaci\xF3n\r\nDedicado
     a todos aquellos que luchan por mantener vivas las ra\xEDces y la cultura de
