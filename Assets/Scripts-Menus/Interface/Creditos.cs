@@ -9,7 +9,7 @@ public class Creditos : MonoBehaviour
     // Invoca el método "LoadMainMenu" después de 31 segundos, que cambiará a la escena "MainMenu"
     void Start()
     {
-        Invoke("LoadMainMenu", 35);
+        Invoke("LoadMainMenu", 43);
     }
 
     // Este método se llama una vez por frame
