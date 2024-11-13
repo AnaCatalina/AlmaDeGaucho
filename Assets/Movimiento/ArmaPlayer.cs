@@ -1,3 +1,4 @@
+using CamaraTerceraPersona;
 using SUPERCharacte;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ public class ArmaPlayer : MonoBehaviour
     public GameObject facon;
     public BoxCollider faconCollider;
     private JuanMoveBehaviour moveBehaviour;
+    private CamaraBahaviour cameraPro;
 
     public GameObject poncho;
     public BoxCollider ponchoCollider;
@@ -28,6 +30,7 @@ public class ArmaPlayer : MonoBehaviour
     void Start()
     {
         moveBehaviour = GetComponent<JuanMoveBehaviour>();
+        cameraPro = GetComponent<CamaraBahaviour>();
         //animator = GetComponent<Animator>();
         DesactivarColliderFacon();//se desactivan los boxColliders del puño y de la espada
         //tengoArma = false;      //al iniciar la escena el player no tiene un arma
@@ -58,8 +61,8 @@ public class ArmaPlayer : MonoBehaviour
         if (pressBoleadoras)
         {
             pressBoleadoras= false;
-            moveBehaviour.playerCamera.transform.position = moveBehaviour.posCamera.transform.position;
-            moveBehaviour.playerCamera.transform.rotation = moveBehaviour.posCamera.transform.rotation;
+            cameraPro.playerCamera.transform.position = cameraPro.posCamera.transform.position;
+            cameraPro.playerCamera.transform.rotation = cameraPro.posCamera.transform.rotation;
             
             //moveBehaviour.playerCamera.transform.position = new Vector3(moveBehaviour.p_Rigidbody.position.x + 0.7f,moveBehaviour.p_Rigidbody.position.y + 1f,moveBehaviour.p_Rigidbody.position.z - 2f);
             ActivarBoleadoras();

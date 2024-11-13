@@ -7,7 +7,8 @@ public class Controller : MonoBehaviour
 
     public GameObject armasRing;
     public bool enMenuRadial;
-  
+    public bool puedoUsarMenu;
+
     // Update is called once per frame
     void Update()
     {
