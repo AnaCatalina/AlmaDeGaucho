@@ -7,12 +7,12 @@ public class Controller : MonoBehaviour
 
     public GameObject armasRing;
     public bool enMenuRadial;
-    public bool puedoUsarMenu;
+    public bool puedoUsarMenu = true;
 
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.Tab))
+        if(Input.GetKeyDown(KeyCode.Tab) && puedoUsarMenu)
         {
             enMenuRadial = true;
             armasRing.SetActive(true);
@@ -20,7 +20,7 @@ public class Controller : MonoBehaviour
             Cursor.visible = true;
         }
 
-        if(Input.GetKeyUp(KeyCode.Tab))
+        if(Input.GetKeyUp(KeyCode.Tab) && puedoUsarMenu)
         {
             enMenuRadial = false;
             armasRing.SetActive(false);

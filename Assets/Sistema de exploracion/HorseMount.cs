@@ -12,6 +12,7 @@ public class HorseMount : MonoBehaviour
 
     private NavMeshAgent agent;
     private HorseFollowNavMesh followNavMesh;
+    private MovementHorse movementHorse;
 
     private bool isMounted = false;
     private JuanMoveBehaviour playerMovement; // Referencia al script de movimiento del player
@@ -28,6 +29,7 @@ public class HorseMount : MonoBehaviour
         playerController = player.GetComponent<Controller>();
         agent = GetComponent<NavMeshAgent>();
         followNavMesh = GetComponent<HorseFollowNavMesh>();
+        movementHorse = GetComponent<MovementHorse>();  
     }
 
     void Update()
@@ -35,7 +37,7 @@ public class HorseMount : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Montar el caballo
-        if (distanceToPlayer <= mountDistance && Input.GetKeyDown(KeyCode.E) && !isMounted && !playerMovement.tengoBoleadoras && !playerMovement.tengoFacon)
+        if (distanceToPlayer <= mountDistance && Input.GetKeyDown(KeyCode.E) && !isMounted && !playerMovement.tengoBoleadoras && !playerMovement.tengoFacon && playerMovement.isIdle)
         {
             MountHorse();
             playerController.puedoUsarMenu = false;
@@ -51,23 +53,27 @@ public class HorseMount : MonoBehaviour
 
     void MountHorse()
     {
-        isMounted = true;
+        // Desactivar el movimiento del player
+        playerMovement.enabled = false;
+        //player.parent = transform; // Hacer que el player sea hijo del caballo
+
         playerRb.isKinematic = true; // Desactivar la física del player
         playerCollider.enabled = false; // Desactivar colisiones del player
+
+        playerAnimator.SetBool("Sentado", true);
 
         // Posicionar al player en el punto de montar
         player.position = mountPoint.position;
         player.rotation = mountPoint.rotation;
 
-        // Desactivar el movimiento del player
-        playerMovement.enabled = false;
         player.parent = transform; // Hacer que el player sea hijo del caballo
+        isMounted = true;
 
         // Habilitar el control del caballo
         agent.enabled = false;
         followNavMesh.enabled = false;
-        GetComponent<MovementHorse>().enabled = true;
-        playerAnimator.SetBool("Sentado", true);
+        movementHorse.enabled = true;
+        //playerAnimator.SetBool("Sentado", true);
     }
 
     void DismountHorse()
@@ -77,7 +83,7 @@ public class HorseMount : MonoBehaviour
         playerCollider.enabled = true; // Reactivar colisiones del player
 
         // Desactivar el control del caballo
-        GetComponent<MovementHorse>().enabled = false;
+        movementHorse.enabled = false;
         agent.enabled = true;
         followNavMesh.enabled = true;
 
