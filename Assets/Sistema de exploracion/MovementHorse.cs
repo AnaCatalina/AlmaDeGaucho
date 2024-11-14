@@ -11,8 +11,8 @@ public class MovementHorse : MonoBehaviour
     public float walkSpeed = 2f;
     public float trotSpeed = 6f;
     public float runSpeed = 12f;
-    public float turnSpeed = 200f;
-    [Range(0.1f, 1.5f)]
+    public float turnSpeed;
+    [Range(0f, 1f)]
     public float rotationSpeed;
     [Range (1f, 10f)]
     public float jumpForce;
@@ -40,6 +40,7 @@ public class MovementHorse : MonoBehaviour
 
     void Update()
     {
+        
         HandleMovement();
         HandleSpeedChange();
     }
@@ -91,6 +92,13 @@ public class MovementHorse : MonoBehaviour
         //animator.SetFloat("Vel", Mathf.Abs(moveDirection));
         //animator.SetFloat("Vel", v * currentSpeed);
         animator.SetFloat("Vel", move.magnitude);
+
+        if (move.magnitude == 0)
+        {
+            currentSpeed = walkSpeed;
+            isRunning = false;
+            isGalloping = false;
+        }
     }
 
     void HandleSpeedChange()
