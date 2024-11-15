@@ -6,16 +6,14 @@ using UnityEngine;
 public class MovementHorse : MonoBehaviour
 {
     #region
-
-
     public float walkSpeed = 2f;
     public float trotSpeed = 6f;
     public float runSpeed = 12f;
-    public float turnSpeed;
+    public float turnSpeed = 5f;
     [Range(0f, 1f)]
-    public float rotationSpeed;
+    public float rotationSpeed = 0.2f;
     [Range (1f, 10f)]
-    public float jumpForce;
+    public float jumpForce = 5f;
     #endregion
 
     private Rigidbody rb;
@@ -57,24 +55,30 @@ public class MovementHorse : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
 
         #region Cam Dir
-        camForwad = Vector3.Scale(cam.transform.forward, new Vector3(1, 1, 1)).normalized;
-        Vector3 camFlatFwd = Vector3.Scale(cam.transform.forward, new Vector3(1, 0, 1)).normalized;
+        //camForwad = Vector3.Scale(cam.transform.forward, new Vector3(1, 1, 1)).normalized;
+        camForwad = Vector3.Scale(cam.transform.forward, new Vector3(1, 0, 1)).normalized;
+        Vector3 camRight = Vector3.Scale(cam.transform.right, new Vector3(1, 0, 1).normalized);
+        /*Vector3 camFlatFwd = Vector3.Scale(cam.transform.forward, new Vector3(1, 0, 1)).normalized;
         Vector3 flatRight = new Vector3(cam.transform.right.x, 0, cam.transform.right.z);
 
         Vector3 m_CharForwad = Vector3.Scale(camFlatFwd, new Vector3(1, 0, 1)).normalized;
-        Vector3 m_CharRight = Vector3.Scale(flatRight, new Vector3(1, 0, 1)).normalized;
+        Vector3 m_CharRight = Vector3.Scale(flatRight, new Vector3(1, 0, 1)).normalized;*/
         #endregion
 
-        // Movimiento hacia adelante y atrás
-        //Vector3 move = transform.forward * moveDirection * currentSpeed * Time.deltaTime;
-        //rb.MovePosition(rb.position + move);
+        Vector3 move = v * camForwad * currentSpeed + h * camRight * currentSpeed;
+
+        if (move.magnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(move);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed);
+        }
+        rb.MovePosition(rb.position + move * Time.deltaTime);
         
-        Vector3 move = v * m_CharForwad * currentSpeed + h * m_CharRight * currentSpeed;
+        /*Vector3 move = v * m_CharForwad * currentSpeed + h * m_CharRight * currentSpeed;
         cam.transform.position += move * Time.deltaTime;
         transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, move, rotationSpeed, 0.0f));
 
-        transform.position += move * Time.deltaTime;
-
+        transform.position += move * Time.deltaTime;*/
         // Rotación del caballo
         /*if (h != 0)
         {
@@ -83,7 +87,7 @@ public class MovementHorse : MonoBehaviour
         }*/
 
         // Salto
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && Mathf.Abs(rb.velocity.y) < 0.1f)
         {
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }

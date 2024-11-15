@@ -25,6 +25,7 @@ namespace CamaraTerceraPersona
         public GameObject posCamera;
         private JuanMoveBehaviour moveBehaviour;
 
+
         #region Camera Settings
         [Header("Camera Settings")]
         //
