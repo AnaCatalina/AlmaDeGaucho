@@ -1,3 +1,4 @@
+using CamaraTerceraPersona;
 using SUPERCharacte;
 using System.Collections;
 using System.Collections.Generic;
@@ -20,6 +21,7 @@ public class HorseMount : MonoBehaviour
     private CapsuleCollider playerCollider;
     private Controller playerController;
     public Animator playerAnimator;
+    //private CamaraBahaviour camaraJugador;
 
     void Start()
     {
@@ -27,6 +29,7 @@ public class HorseMount : MonoBehaviour
         playerRb = player.GetComponent<Rigidbody>();
         playerCollider = player.GetComponent<CapsuleCollider>();
         playerController = player.GetComponent<Controller>();
+        //camaraJugador = player.GetComponent<CamaraBahaviour>();
         agent = GetComponent<NavMeshAgent>();
         followNavMesh = GetComponent<HorseFollowNavMesh>();
         movementHorse = GetComponent<MovementHorse>();  
@@ -73,6 +76,9 @@ public class HorseMount : MonoBehaviour
         agent.enabled = false;
         followNavMesh.enabled = false;
         movementHorse.enabled = true;
+        //camaraJugador.playerCamera = camaraJugador.horseCamera;
+        //camaraJugador.pCamera.enabled = false;
+        //camaraJugador.horseCamera.enabled = true;
         //playerAnimator.SetBool("Sentado", true);
     }
 
@@ -90,6 +96,11 @@ public class HorseMount : MonoBehaviour
         // Permitir que el player se mueva de nuevo
         playerMovement.enabled = true;
         player.parent = null; // Separar al player del caballo
+
+        //camaraJugador.pCamera.enabled = true;
+        //camaraJugador.horseCamera.enabled = false;
+        //camaraJugador.playerCamera = camaraJugador.pCamera;
+
         playerAnimator.SetBool("Sentado", false);
 
         // Colocar al player al lado del caballo al desmontar
