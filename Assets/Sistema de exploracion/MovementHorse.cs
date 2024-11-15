@@ -54,7 +54,7 @@ public class MovementHorse : MonoBehaviour
         float v = Input.GetAxis("Vertical");
         float h = Input.GetAxis("Horizontal");
 
-        #region Cam Dir
+        #region Direccion de la camara
         //camForwad = Vector3.Scale(cam.transform.forward, new Vector3(1, 1, 1)).normalized;
         camForwad = Vector3.Scale(cam.transform.forward, new Vector3(1, 0, 1)).normalized;
         Vector3 camRight = Vector3.Scale(cam.transform.right, new Vector3(1, 0, 1).normalized);
@@ -65,13 +65,18 @@ public class MovementHorse : MonoBehaviour
         Vector3 m_CharRight = Vector3.Scale(flatRight, new Vector3(1, 0, 1)).normalized;*/
         #endregion
 
-        Vector3 move = v * camForwad * currentSpeed + h * camRight * currentSpeed;
+        //Se crea Vector de movimiento
+        //Vector3 move = v * camForwad * currentSpeed + h * camRight * currentSpeed;
+        Vector3 move = (v * camForwad + h * camRight).normalized * currentSpeed;
 
+        //Rotación hacia la dirección del movimiento si se esta moviendo
         if (move.magnitude > 0.1f)
         {
             Quaternion targetRotation = Quaternion.LookRotation(move);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed);
         }
+
+        //Aplicar movimiento normalizado
         rb.MovePosition(rb.position + move * Time.deltaTime);
         
         /*Vector3 move = v * m_CharForwad * currentSpeed + h * m_CharRight * currentSpeed;
@@ -92,14 +97,16 @@ public class MovementHorse : MonoBehaviour
             rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
         }
 
-        // Animaciones (asume que tienes un Animator configurado)
+        // Animaciones
         //animator.SetFloat("Vel", Mathf.Abs(moveDirection));
         //animator.SetFloat("Vel", v * currentSpeed);
         animator.SetFloat("Vel", move.magnitude);
 
+        //Resetea la velocidad al detener el movimiento
         if (move.magnitude == 0)
         {
             currentSpeed = walkSpeed;
+            //currentSpeed = Mathf.Lerp(currentSpeed, walkSpeed, Time.deltaTime * 5f);
             isRunning = false;
             isGalloping = false;
         }
@@ -113,11 +120,13 @@ public class MovementHorse : MonoBehaviour
             if (!isGalloping)
             {
                 currentSpeed = trotSpeed;
+                //currentSpeed = Mathf.Lerp(currentSpeed, trotSpeed, Time.deltaTime * 5f);
                 isGalloping = true;
             }
             else if (!isRunning)
             {
                 currentSpeed = runSpeed;
+                //currentSpeed = Mathf.Lerp(currentSpeed, runSpeed, Time.deltaTime * 5f);
                 isRunning = true;
             }
         }
@@ -128,11 +137,13 @@ public class MovementHorse : MonoBehaviour
             if (isRunning)
             {
                 currentSpeed = trotSpeed;
+                //currentSpeed = Mathf.Lerp(currentSpeed, trotSpeed, Time.deltaTime * 5f);
                 isRunning = false;
             }
             else if (isGalloping)
             {
                 currentSpeed = walkSpeed;
+                //currentSpeed = Mathf.Lerp(currentSpeed, walkSpeed, Time.deltaTime * 5f);
                 isGalloping = false;
             }
         }
