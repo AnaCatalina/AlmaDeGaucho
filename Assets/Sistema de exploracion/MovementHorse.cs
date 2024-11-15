@@ -23,6 +23,10 @@ public class MovementHorse : MonoBehaviour
     private bool isGalloping = false;
     private bool isRunning = false;
 
+    public float rayDistance = 1.5f;
+    public float rayUp = 0.5f;
+    public float radioCast = 0.1f;
+
     #region Camara
     public Camera cam;
     public CamaraBahaviour cameraPro;
@@ -41,6 +45,7 @@ public class MovementHorse : MonoBehaviour
         
         HandleMovement();
         HandleSpeedChange();
+        Debug.DrawRay(transform.position + Vector3.up * rayUp, transform.forward * rayDistance, Color.red);
     }
 
     private void FixedUpdate()
@@ -69,16 +74,33 @@ public class MovementHorse : MonoBehaviour
         //Vector3 move = v * camForwad * currentSpeed + h * camRight * currentSpeed;
         Vector3 move = (v * camForwad + h * camRight).normalized * currentSpeed;
 
-        //Rotación hacia la dirección del movimiento si se esta moviendo
-        if (move.magnitude > 0.1f)
+        RaycastHit hit;
+        bool obstaculo = Physics.SphereCast(transform.position + Vector3.up * rayUp, radioCast,transform.forward, out hit, rayDistance);
+
+        
+
+        if (obstaculo && Vector3.Dot(transform.forward, move) > 0)
         {
-            Quaternion targetRotation = Quaternion.LookRotation(move);
+            move = Vector3.zero;
+            //animator.SetFloat("Vel", 0);
+        }
+
+        if(move.magnitude >0.1f || h != 0)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(move.magnitude > 0 ? move : transform.forward);
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed);
         }
 
+
+        //Rotación hacia la dirección del movimiento si se esta moviendo
+       /* if (move.magnitude > 0.1f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(move);
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed);
+        }*/
+
         //Aplicar movimiento normalizado
         rb.MovePosition(rb.position + move * Time.deltaTime);
-        
         /*Vector3 move = v * m_CharForwad * currentSpeed + h * m_CharRight * currentSpeed;
         cam.transform.position += move * Time.deltaTime;
         transform.rotation = Quaternion.LookRotation(Vector3.RotateTowards(transform.forward, move, rotationSpeed, 0.0f));
