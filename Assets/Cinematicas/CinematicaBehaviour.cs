@@ -39,6 +39,7 @@ public class CinematicaBehaviour : MonoBehaviour
     public void CheckOver(VideoPlayer vp)
     {
         playerMovement.enabled = true;
+        playerMovement.atacando = false;
         playerController.enabled = true;
         camaraJugador.enabled = true;
         gameObject.SetActive(false);

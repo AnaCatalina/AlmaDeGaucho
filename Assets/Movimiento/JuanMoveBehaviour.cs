@@ -240,6 +240,10 @@ namespace SUPERCharacte
         [Space(18)]
         public bool enableGroundingDebugging = false, enableMovementDebugging = false, enableMouseAndCameraDebugging = false, enableVaultDebugging = false;
         #endregion
+        private void Awake()
+        {
+            capsule = GetComponent<CapsuleCollider>();
+        }
         void Start()
         {
             camaraPro = GetComponent<CamaraBahaviour>();
@@ -308,7 +312,7 @@ namespace SUPERCharacte
 
             #region Movement
             p_Rigidbody = GetComponent<Rigidbody>();
-            capsule = GetComponent<CapsuleCollider>();
+            //capsule = GetComponent<CapsuleCollider>();
             standingHeight = capsule.height;
             currentGroundSpeed = walkingSpeed;
             _ZeroFriction = new PhysicMaterial("Zero_Friction");
