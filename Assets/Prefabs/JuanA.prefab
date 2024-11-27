@@ -3631,11 +3631,8 @@ GameObject:
   - component: {fileID: 8047294652321011671}
   - component: {fileID: 439773460208311617}
   - component: {fileID: 5705291347461386845}
-  - component: {fileID: 8996445648018487081}
   - component: {fileID: 8568773689746074527}
   - component: {fileID: 3508660911489078466}
-  - component: {fileID: 5145167526862769722}
-  - component: {fileID: 5055308708408520895}
   - component: {fileID: 1138975229561444914}
   m_Layer: 6
   m_Name: JuanA
@@ -3815,7 +3812,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7479887244234480813}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b7bcc8eeaacd261409d96ce07dcad429, type: 3}
   m_Name: 
@@ -3897,6 +3894,7 @@ MonoBehaviour:
     groundLayer: {fileID: 0}
     groundPhysicMaterial: {fileID: 0}
   InputDir: {x: 0, y: 0, z: 0}
+  _2DVelocity: {x: 0, y: 0}
   capsule: {fileID: 0}
   p_Rigidbody: {fileID: 0}
   changingStances: 0
@@ -3917,17 +3915,18 @@ MonoBehaviour:
   footstepSoundSet:
   - profileTriggerType: 1
     _Materials:
-    - {fileID: 10652, guid: 0000000000000000f000000000000000, type: 0}
+    - {fileID: 10650, guid: 0000000000000000f000000000000000, type: 0}
     _physicMaterials: []
     _Layers:
+    - {fileID: 8574412962073106934, guid: 4bfe038002095a044a42e7df8b55c877, type: 2}
     - {fileID: 8574412962073106934, guid: a85f36cbafbf6864c8fff41848a4ad16, type: 2}
     - {fileID: 8574412962073106934, guid: 4c0f9679826956e4e802e75fe59f8bde, type: 2}
     - {fileID: 8574412962073106934, guid: 20267670fc818a848a5d94a2c4c70ef4, type: 2}
+    - {fileID: 8574412962073106934, guid: 30406138cd95af647a246352b53f8954, type: 2}
+    - {fileID: 8574412962073106934, guid: 775d7cb4a7d926b4799d6226f183a09d, type: 2}
     - {fileID: 8574412962073106934, guid: e4d5c6caf9b89b04c8d8436251c5fb9a, type: 2}
-    - {fileID: 8574412962073106934, guid: 990bee4939a844243984521ddcf63e6a, type: 2}
-    - {fileID: 8574412962073106934, guid: 9fcf4607287949b419a2ca38ffdb1cc9, type: 2}
-    - {fileID: 8574412962073106934, guid: 3a8403e6c8598494ebe0fa780b057472, type: 2}
-    - {fileID: 8574412962073106934, guid: d7b54949314bb2f469c060785e5be5cd, type: 2}
+    - {fileID: 8574412962073106934, guid: 8fb6d0278f3e6a64688cffa0921a47d3, type: 2}
+    - {fileID: 8574412962073106934, guid: 162929e0c0867c84e90401603f8dbf1a, type: 2}
     footstepClips:
     - {fileID: 8300000, guid: a9e804a8165699a49bceb84d083a34a6, type: 3}
     - {fileID: 8300000, guid: fead5cfe6593ab64dac60ff7b677fb86, type: 3}
@@ -3937,6 +3936,25 @@ MonoBehaviour:
     - {fileID: 8300000, guid: ffeb60b812fdc464499d8bd1c46cd055, type: 3}
     - {fileID: 8300000, guid: 7b10d52be5966cc49b99c126a03640e5, type: 3}
     - {fileID: 8300000, guid: fbe1939915c91b74f9eded7665492ef6, type: 3}
+  StepCycle: 0
+  enableSurvivalStats: 1
+  defaultSurvivalStats:
+    Health: 250
+    Hunger: 100
+    Hydration: 100
+    hasLowHealth: 0
+    isStarving: 0
+    isDehydrated: 0
+  statTickRate: 6
+  hungerDepletionRate: 0.06
+  hydrationDepletionRate: 0.14
+  currentSurvivalStats:
+    Health: 250
+    Hunger: 100
+    Hydration: 100
+    hasLowHealth: 0
+    isStarving: 0
+    isDehydrated: 0
   _3rdPersonCharacterAnimator: {fileID: 1948686718584878147}
   a_velocity: 
   a_2DVelocity: Vel
@@ -3985,18 +4003,6 @@ MonoBehaviour:
   pressManos: 0
   pressRifle: 0
   pressBoleadoras: 0
---- !u!114 &8996445648018487081
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7479887244234480813}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 35c0ce336086d0548bfb1b400c90f06e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &8568773689746074527
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4004,7 +4010,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7479887244234480813}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5fb3136bd1a3a65448558d029a7c83f0, type: 3}
   m_Name: 
@@ -4019,7 +4025,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7479887244234480813}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 57def1f407424cb4fa697d462728031a, type: 3}
   m_Name: 
@@ -4042,34 +4048,6 @@ MonoBehaviour:
   amountChText: {fileID: 0}
   panelInventario: {fileID: 0}
   inventarioAbierto: 0
---- !u!114 &5145167526862769722
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7479887244234480813}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 692f86be5017f5a49b9b0d3d8915250c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  animator: {fileID: 1948686718584878147}
---- !u!114 &5055308708408520895
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7479887244234480813}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4b15c8fb84bb36e4ea00d94d81a1bcec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 100
-  currentHealth: 0
-  moveBehaviour: {fileID: 439773460208311617}
 --- !u!114 &1138975229561444914
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4077,7 +4055,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7479887244234480813}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 992133f50b7b2614392e1d4e41678ce3, type: 3}
   m_Name: 
@@ -4087,10 +4065,11 @@ MonoBehaviour:
   enableCameraControl: 1
   lockAndHideMouse: 1
   drawPrimitiveUI: 1
-  cameraPerspective: 1
+  cameraPerspective: 0
   automaticallySwitchPerspective: 0
+  perspectiveSwitchingKey_L: 0
   mouseInputInversion: 0
-  Sensitivity: 2
+  Sensitivity: 8
   rotationWeight: 5
   verticalRotationRange: 150
   standingEyeHeight: 0.79
@@ -4111,6 +4090,10 @@ MonoBehaviour:
   headRot: {x: 0, y: 0, z: 0}
   currentCameraPos: {x: 0, y: 0, z: 0}
   cameraPosVelRef: {x: 0, y: 0, z: 0}
+  enableHeadbob: 1
+  headbobSpeed: 0.5
+  headbobPower: 0.25
+  ZTilt: 3
 --- !u!1 &7732629830884963100
 GameObject:
   m_ObjectHideFlags: 0
