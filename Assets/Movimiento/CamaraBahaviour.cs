@@ -26,7 +26,7 @@ namespace CamaraTerceraPersona
         private JuanMoveBehaviour moveBehaviour;
 
 
-        #region Camera Settings
+        #region Camera Settings F
         [Header("Camera Settings")]
         //
         //Public
@@ -38,11 +38,20 @@ namespace CamaraTerceraPersona
         //use mouse wheel to switch modes. (too close will set it to fps mode and attempting to zoom out from fps will switch to tps mode)
         public bool automaticallySwitchPerspective = true;
 
+        /////
+#if ENABLE_INPUT_SYSTEM
+    public Key perspectiveSwitchingKey = Key.Q;
+#else
+        public KeyCode perspectiveSwitchingKey_L = KeyCode.None;
+#endif
+        /////
         public MouseInputInversionModes mouseInputInversion;
         public float Sensitivity = 8;
         public float rotationWeight = 4;
         public float verticalRotationRange = 170.0f;
         public float standingEyeHeight = 0.8f;
+        public float standingEyeX = 0.8f;
+        public float standingEyeZ = 0.8f;
         public float crouchingEyeHeight = 0.25f;
 
         //First person
@@ -86,14 +95,35 @@ namespace CamaraTerceraPersona
         //[Space(20)]
         #endregion
 
+        #region  Headbob
+        //
+        //Public
+        //
+        public bool enableHeadbob = true;
+        [Range(1.0f, 5.0f)] public float headbobSpeed = 0.5f, headbobPower = 0.25f;
+        [Range(0.0f, 3.0f)] public float ZTilt = 3;
+
+        //
+        //Internal
+        //
+        bool shouldCalculateHeadbob;
+        Vector3 headbobCameraPosition;
+        float headbobCyclePosition, headbobWarmUp;
+
+        #endregion
+
+        
+
         #endregion
         // Start is called before the first frame update
         void Start()
         {
             moveBehaviour = GetComponent<JuanMoveBehaviour>();
-            #region Camera
+            #region Camera F
             maxCameraDistInternal = maxCameraDistance;
             initialCameraFOV = playerCamera.fieldOfView;
+            headbobCameraPosition = Vector3.up * standingEyeHeight;
+            //headbobCameraPosition = new Vector3(standingEyeX, standingEyeHeight, standingEyeZ);
             internalEyeHeight = standingEyeHeight;
             if (lockAndHideMouse)
             {
@@ -131,6 +161,31 @@ namespace CamaraTerceraPersona
                     stamMeter.rectTransform.anchoredPosition = new Vector2(0, 22);
                     stamMeter.color = Color.white;
                     stamMeter.gameObject.SetActive(moveBehaviour.enableStaminaSystem);
+                    //Stats Panel
+                    statsPanel = new GameObject("Stats Panel").AddComponent<Image>();
+                    statsPanel.rectTransform.sizeDelta = new Vector2(3, 45);
+                    statsPanel.transform.SetParent(canvas.transform);
+                    statsPanel.rectTransform.anchorMin = new Vector2(0, 0);
+                    statsPanel.rectTransform.anchorMax = new Vector2(0, 0);
+                    statsPanel.rectTransform.anchoredPosition = new Vector2(12, 33);
+                    statsPanel.color = Color.clear;
+                    statsPanel.gameObject.SetActive(moveBehaviour.enableSurvivalStats);
+                    //Stats Panel BG
+                    statsPanelBG = new GameObject("Stats Panel BG").AddComponent<Image>();
+                    statsPanelBG.rectTransform.sizeDelta = new Vector2(175, 45);
+                    statsPanelBG.transform.SetParent(statsPanel.transform);
+                    statsPanelBG.rectTransform.anchorMin = new Vector2(0, 0);
+                    statsPanelBG.rectTransform.anchorMax = new Vector2(1, 0);
+                    statsPanelBG.rectTransform.anchoredPosition = new Vector2(87, 22);
+                    statsPanelBG.color = Color.white * 0.5f;
+                    //Health Meter
+                    HealthMeter = new GameObject("Health Meter").AddComponent<Image>();
+                    HealthMeter.rectTransform.sizeDelta = normalMeterSizeDelta;
+                    HealthMeter.transform.SetParent(statsPanel.transform);
+                    HealthMeter.rectTransform.anchorMin = new Vector2(0, 0);
+                    HealthMeter.rectTransform.anchorMax = new Vector2(1, 0);
+                    HealthMeter.rectTransform.anchoredPosition = new Vector2(87, 6);
+                    HealthMeter.color = new Color32(211, 0, 0, 255);
 
                 }
             }
@@ -145,18 +200,18 @@ namespace CamaraTerceraPersona
             {
                 if (!moveBehaviour.controllerPaused)
                 {
-                    #region Input
+                    #region Input f
                     //camera
                     MouseXY.x = Input.GetAxis("Mouse Y");
                     MouseXY.y = Input.GetAxis("Mouse X");
                     mouseScrollWheel = Input.GetAxis("Mouse ScrollWheel");
-                    //perspecTog = Input.GetKeyDown(perspectiveSwitchingKey_L);
+                    perspecTog = Input.GetKeyDown(perspectiveSwitchingKey_L);
                     //interactInput = Input.GetKeyDown(interactKey_L);
                     #endregion
 
                     if (!moveBehaviour.tengoBoleadoras)
                     {
-                        #region Camera
+                        #region Camera F
                         if (enableCameraControl)
                         {
                             switch (cameraPerspective)
@@ -167,7 +222,7 @@ namespace CamaraTerceraPersona
                                         //RotateView(MouseXY, Sensitivity, rotationWeight);
                                         if (!isInFirstPerson) { ChangePerspective(PerspectiveModes._1stPerson); }
                                         if (perspecTog || (automaticallySwitchPerspective && mouseScrollWheel < 0)) { ChangePerspective(PerspectiveModes._3rdPerson); }
-                                        //HeadbobCycleCalculator();
+                                        HeadbobCycleCalculator();
                                         FOVKick();
                                     }
                                     break;
@@ -192,19 +247,19 @@ namespace CamaraTerceraPersona
                         }
                         if (drawPrimitiveUI)
                         {
-                            /* if (enableSurvivalStats)
+                             if (moveBehaviour.enableSurvivalStats)
                              {
                                  if (!statsPanel.gameObject.activeSelf) statsPanel.gameObject.SetActive(true);
 
-                                 HealthMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (currentSurvivalStats.Health / defaultSurvivalStats.Health));
-                                 HydrationMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (currentSurvivalStats.Hydration / defaultSurvivalStats.Hydration));
-                                 HungerMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (currentSurvivalStats.Hunger / defaultSurvivalStats.Hunger));
+                                 HealthMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (moveBehaviour.currentSurvivalStats.Health / moveBehaviour.defaultSurvivalStats.Health));
+                                 //HydrationMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (moveBehaviour.currentSurvivalStats.Hydration / moveBehaviour.defaultSurvivalStats.Hydration));
+                                 //HungerMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (moveBehaviour.currentSurvivalStats.Hunger / moveBehaviour.defaultSurvivalStats.Hunger));
                              }
                              else
                              {
                                  if (statsPanel.gameObject.activeSelf) statsPanel.gameObject.SetActive(false);
 
-                             } */
+                             } 
                             if (moveBehaviour.enableStaminaSystem)
                             {
                                 if (!stamMeterBG.gameObject.activeSelf) stamMeterBG.gameObject.SetActive(true);
@@ -241,6 +296,8 @@ namespace CamaraTerceraPersona
                         #endregion
 
                     }
+
+                    
                 }
             }
         }
@@ -250,7 +307,7 @@ namespace CamaraTerceraPersona
             {
                 if (!moveBehaviour.tengoBoleadoras)
                 {
-                    #region Camera
+                    #region Camera F
                     RotateView(MouseXY, Sensitivity, rotationWeight);
                     if (cameraPerspective == PerspectiveModes._3rdPerson)
                     {
@@ -264,7 +321,7 @@ namespace CamaraTerceraPersona
             }
         }
 
-        #region Camera Functions
+        #region Camera Functions F
         void RotateView(Vector2 yawPitchInput, float inputSensitivity, float cameraWeight)
         {
 
@@ -402,7 +459,7 @@ namespace CamaraTerceraPersona
                             headRot.x += headRot.x > 180 ? -360 : headRot.x < -180 ? 360 : 0;
                             headRot.x = Mathf.Clamp(headRot.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
                             quatHeadRot = Quaternion.Euler(headRot);
-                            //if (doingCamInterp) { }
+                           // if (doingCamInterp) { }
                         }
                     }
                     break;
@@ -419,17 +476,18 @@ namespace CamaraTerceraPersona
                         isInFirstPerson = true;
                         transform.eulerAngles = Vector3.up * headRot.y;
                         playerCamera.transform.localPosition = Vector3.up * standingEyeHeight;
+                        //playerCamera.transform.localPosition = new Vector3(standingEyeX, standingEyeHeight, standingEyeZ);
                         playerCamera.transform.localEulerAngles = (Vector2)playerCamera.transform.localEulerAngles;
                         cameraPerspective = newPerspective;
                         if (moveBehaviour._3rdPersonCharacterAnimator)
                         {
-                            moveBehaviour._3rdPersonCharacterAnimator.gameObject.SetActive(false);
+                            //moveBehaviour._3rdPersonCharacterAnimator.gameObject.SetActive(false);
                         }
-                        /*if (_1stPersonCharacterAnimator)
+                        /*if (moveBehaviour._1stPersonCharacterAnimator)
                         {
-                            _1stPersonCharacterAnimator.gameObject.SetActive(true);
-                        }*/
-                        /*if (crosshairImg && autoGenerateCrosshair)
+                            moveBehaviour._1stPersonCharacterAnimator.gameObject.SetActive(true);
+                        }
+                        if (crosshairImg && autoGenerateCrosshair)
                         {
                             crosshairImg.gameObject.SetActive(true);
                         }*/
@@ -482,6 +540,29 @@ namespace CamaraTerceraPersona
                 }
             }
         }
+
+        void HeadbobCycleCalculator()
+        {
+            if (enableHeadbob)
+            {
+                if (!moveBehaviour.isIdle && moveBehaviour.currentGroundInfo.isGettingGroundInfo && !moveBehaviour.isSliding)
+                {
+                    headbobWarmUp = Mathf.MoveTowards(headbobWarmUp, 1, Time.deltaTime * 5);
+                    headbobCyclePosition += (moveBehaviour._2DVelocity.magnitude) * (Time.deltaTime * (headbobSpeed / 10));
+
+                    headbobCameraPosition.x = (((Mathf.Sin(Mathf.PI * (2 * headbobCyclePosition + 0.5f))) * (headbobPower / 50))) * headbobWarmUp;
+                    headbobCameraPosition.y = ((Mathf.Abs((((Mathf.Sin(Mathf.PI * (2 * headbobCyclePosition))) * 0.75f)) * (headbobPower / 50))) * headbobWarmUp) + internalEyeHeight;
+                    headbobCameraPosition.z = ((Mathf.Sin(Mathf.PI * (2 * headbobCyclePosition))) * (ZTilt / 3)) * headbobWarmUp;
+                }
+                else
+                {
+                    headbobCameraPosition = Vector3.MoveTowards(headbobCameraPosition, Vector3.up * internalEyeHeight, Time.deltaTime / (headbobPower * 0.3f));
+                    headbobWarmUp = 0.1f;
+                }
+                playerCamera.transform.localPosition = (Vector2)headbobCameraPosition;
+                if (moveBehaviour.StepCycle > (headbobCyclePosition * 3)) { moveBehaviour.StepCycle = headbobCyclePosition + 0.5f; }
+            }
+        }
         void UpdateCameraPosition_3rdPerson()
         {
 
@@ -527,15 +608,20 @@ namespace CamaraTerceraPersona
             }
         }
         #endregion
+
+        
     }
 
-    #region Classes and Enums
+    #region Classes and Enums F
+
+    
+
     public enum PerspectiveModes { _1stPerson, _3rdPerson }
     public enum ViewInputModes { Traditional, Retro }
     public enum MouseInputInversionModes { None, X, Y, Both }
     #endregion
 
-    #region Editor Scripting
+    #region Editor Scripting F
 #if UNITY_EDITOR
     [CustomEditor(typeof(CamaraBahaviour))]
     public class CameraFPEditor : Editor
@@ -590,13 +676,13 @@ namespace CamaraTerceraPersona
             t.posCamera = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Posicion Camara(conBoleadoras)",
                 "Referencia a la ubicación en la que estara la cámara CUANDO esté equipada las boleadoras"), t.posCamera, typeof(GameObject), true);
 
-            #region Camera Settings
+            #region Camera Settings F
             GUILayout.Label("Camera Settings", labelHeaderStyle, GUILayout.ExpandWidth(true));
             EditorGUILayout.Space();
             EditorGUILayout.BeginVertical(BoxPanel);
             t.enableCameraControl = EditorGUILayout.ToggleLeft(new GUIContent("Habilitar control de cámara", "¿Debería el jugador tener control sobre la cámara?"), t.enableCameraControl);
             t.playerCamera = (Camera)EditorGUILayout.ObjectField(new GUIContent("Player Camera", "La cámara adjunta al jugador."), t.playerCamera, typeof(Camera), true);
-            //t.cameraPerspective = (PerspectiveModes)EditorGUILayout.EnumPopup(new GUIContent("Camera Perspective Mode", "The current perspective of the character."), t.cameraPerspective);
+            t.cameraPerspective = (PerspectiveModes)EditorGUILayout.EnumPopup(new GUIContent("Camera Perspective Mode", "The current perspective of the character."), t.cameraPerspective);
             //if(t.cameraPerspective == PerspectiveModes._3rdPerson){EditorGUILayout.HelpBox("3rd Person perspective is currently very experimental. Bugs and other adverse effects may occur.",MessageType.Info);}
 
             //EditorGUI.indentLevel--;
@@ -604,11 +690,11 @@ namespace CamaraTerceraPersona
             if (cameraSettingsFoldout)
             {
                 t.automaticallySwitchPerspective = EditorGUILayout.ToggleLeft(new GUIContent("Cambiar perspectiva automáticamente", "¿Debería el modo de perspectiva de la cámara cambiar automáticamente según la distancia entre la cámara y la cabeza del personaje?"), t.automaticallySwitchPerspective);
-                /*#if ENABLE_INPUT_SYSTEM
+                #if ENABLE_INPUT_SYSTEM
                             t.perspectiveSwitchingKey = (Key)EditorGUILayout.EnumPopup(new GUIContent("Perspective Switch Key", "The keyboard key used to switch perspective modes. Set to none if you do not wish to allow perspective switching"),t.perspectiveSwitchingKey);
                 #else
-                                if (!t.automaticallySwitchPerspective) { t.perspectiveSwitchingKey_L = (KeyCode)EditorGUILayout.EnumPopup(new GUIContent("Perspective Switch Key", "The keyboard key used to switch perspective modes. Set to none if you do not wish to allow perspective switching"), t.perspectiveSwitchingKey_L); }
-                #endif*/
+                                if (!t.automaticallySwitchPerspective) { t.perspectiveSwitchingKey_L = (KeyCode)EditorGUILayout.EnumPopup(new GUIContent("Perspective Switch Key", "The keyboard key used to switch perspective modes. Set to none if you do not wish to allow perspective switching \n La tecla del teclado utilizada para cambiar los modos de perspectiva. Configúrelo en ninguno si no desea permitir el cambio de perspectiva"), t.perspectiveSwitchingKey_L); }
+                #endif
                 t.mouseInputInversion = (MouseInputInversionModes)EditorGUILayout.EnumPopup(new GUIContent("Mouse Input Inversion", "¿Qué ejes de la entrada del mouse deberían invertirse, si corresponde?"), t.mouseInputInversion);
                 t.Sensitivity = EditorGUILayout.Slider(new GUIContent("Mouse Sensitivity", "Sensitivity of the mouse"), t.Sensitivity, 1, 20);
                 t.rotationWeight = EditorGUILayout.Slider(new GUIContent("Camera Weight", "¿Qué tan pesada debe sentirse la cámara?"), t.rotationWeight, 1, 25);
@@ -629,8 +715,10 @@ namespace CamaraTerceraPersona
                         "The input method used to rotate the camera.\n El método de entrada utilizado para rotar la cámara."), t.viewInputMethods);
                     t.standingEyeHeight = EditorGUILayout.Slider(new GUIContent("Standing Eye Height",
                         "The Eye height of the player measured from the center of the character's capsule and upwards.\n La altura de los ojos del jugador medida desde el centro de la cápsula del personaje y hacia arriba."), t.standingEyeHeight, 0, 1);
-                    t.crouchingEyeHeight = EditorGUILayout.Slider(new GUIContent("Crouching Eye Height \n Altura de los ojos en cuclillas",
-                        "The Eye height of the player measured from the center of the character's capsule and upwards."), t.crouchingEyeHeight, 0, 1);
+                    t.standingEyeX = EditorGUILayout.Slider(new GUIContent("La altura de los ojos del jugador en el eje X"), t.standingEyeX, 0, 1);
+                    t.standingEyeZ = EditorGUILayout.Slider(new GUIContent("La altura de los ojos del jugador en el eje Z"), t.standingEyeZ, 0, 1);
+                    t.crouchingEyeHeight = EditorGUILayout.Slider(new GUIContent("Crouching Eye Height",
+                        "The Eye height of the player measured from the center of the character's capsule and upwards.\n La altura de los ojos del jugador medida desde el centro de la cápsula del personaje y hacia arriba."), t.crouchingEyeHeight, 0, 1);
                     t.FOVKickAmount = EditorGUILayout.Slider(new GUIContent("FOV Kick Amount",
                         "How much should the camera's FOV change based on the current movement speed? \n ¿Cuánto debería cambiar el campo de visión de la cámara en función de la velocidad de movimiento actual?"), t.FOVKickAmount, 0, 50);
                     t.FOVSensitivityMultiplier = EditorGUILayout.Slider(new GUIContent("FOV Sensitivity Multiplier",
@@ -655,6 +743,8 @@ namespace CamaraTerceraPersona
             #endregion
 
             EditorGUILayout.Space(); EditorGUILayout.LabelField("", GUI.skin.horizontalSlider, GUILayout.MaxHeight(6)); EditorGUILayout.Space();
+
+
 
         }
     }

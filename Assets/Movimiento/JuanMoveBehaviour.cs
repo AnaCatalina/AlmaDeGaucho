@@ -171,7 +171,7 @@ namespace SUPERCharacte
         float HeadRotDirForInput;
         Vector2 MovInput;
         Vector2 MovInput_Smoothed;
-        Vector2 _2DVelocity;
+        public Vector2 _2DVelocity;
         float _2DVelocityMag, speedToVelocityRatio;
         PhysicMaterial _ZeroFriction, _MaxFriction;
         public CapsuleCollider capsule;
@@ -210,12 +210,26 @@ namespace SUPERCharacte
         [Range(0.0f, 1.0f)] public float modificadorCorriendo = 0.50f;
         public List<GroundMaterialProfile> footstepSoundSet = new List<GroundMaterialProfile>();
         bool shouldCalculateFootstepTriggers = true;
-        float StepCycle = 0;
+        public float StepCycle = 0;
         AudioSource playerAudioSource;
         List<AudioClip> currentClipSet = new List<AudioClip>();
         [Space(18)]
         #endregion
 
+        #region  Survival Stats
+        //
+        //Public
+        //
+        public bool enableSurvivalStats = true;
+        public SurvivalStats defaultSurvivalStats = new SurvivalStats();
+        public float statTickRate = 6.0f, hungerDepletionRate = 0.06f, hydrationDepletionRate = 0.14f;
+        public SurvivalStats currentSurvivalStats = new SurvivalStats();
+
+        //
+        //Internal
+        //
+        float StatTickTimer;
+        #endregion
 
         #region Collectables
         #endregion
@@ -509,7 +523,12 @@ namespace SUPERCharacte
                     if (enableStaminaSystem) { CalculateStamina(); }
                     #endregion
 
-
+                    #region Survival Stats
+                    if (enableSurvivalStats && Time.time > StatTickTimer)
+                    {
+                        TickStats();
+                    }
+                    #endregion
 
                 }
                 else
@@ -595,291 +614,7 @@ namespace SUPERCharacte
                #endregion
            }*/
 
-        #region Camera Functions
-        /*void RotateView(Vector2 yawPitchInput, float inputSensitivity, float cameraWeight)
-        {
-
-            switch (viewInputMethods)
-            {
-
-                case ViewInputModes.Traditional:
-                    {
-                        yawPitchInput.x *= ((mouseInputInversion == MouseInputInversionModes.X || mouseInputInversion == MouseInputInversionModes.Both) ? 1 : -1);
-                        yawPitchInput.y *= ((mouseInputInversion == MouseInputInversionModes.Y || mouseInputInversion == MouseInputInversionModes.Both) ? -1 : 1);
-                        float maxDelta = Mathf.Min(5, (26 - cameraWeight)) * 360;
-                        switch (cameraPerspective)
-                        {
-                            case PerspectiveModes._1stPerson:
-                                {
-                                    Vector2 targetAngles = ((Vector2.right * playerCamera.transform.localEulerAngles.x) + (Vector2.up * p_Rigidbody.rotation.eulerAngles.y));
-                                    float fovMod = FOVSensitivityMultiplier > 0 && playerCamera.fieldOfView <= initialCameraFOV ? ((initialCameraFOV - playerCamera.fieldOfView) * (FOVSensitivityMultiplier / 10)) + 1 : 1;
-                                    targetAngles = Vector2.SmoothDamp(targetAngles, targetAngles + (yawPitchInput * (((inputSensitivity * 5) / fovMod))), ref viewRotVelRef, (Mathf.Pow(cameraWeight * fovMod, 2)) * Time.fixedDeltaTime, maxDelta, Time.fixedDeltaTime);
-
-                                    targetAngles.x += targetAngles.x > 180 ? -360 : targetAngles.x < -180 ? 360 : 0;
-                                    targetAngles.x = Mathf.Clamp(targetAngles.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
-                                    //playerCamera.transform.localEulerAngles = (Vector3.right * targetAngles.x) + (Vector3.forward * (enableHeadbob ? headbobCameraPosition.z : 0));
-                                    playerCamera.transform.localEulerAngles = (Vector3.right * targetAngles.x) + (Vector3.forward);
-                                    p_Rigidbody.MoveRotation(Quaternion.Euler(Vector3.up * targetAngles.y));
-
-                                    //p_Rigidbody.rotation = ;
-                                    //transform.localEulerAngles = (Vector3.up*targetAngles.y);
-                                }
-                                break;
-
-                            case PerspectiveModes._3rdPerson:
-                                {
-
-                                    headPos = transform.position + Vector3.up * standingEyeHeight;
-                                    quatHeadRot = Quaternion.Euler(headRot);
-                                    headRot = Vector3.SmoothDamp(headRot, headRot + ((Vector3)yawPitchInput * (inputSensitivity * 5)), ref cameraPosVelRef, (Mathf.Pow(cameraWeight, 2)) * Time.fixedDeltaTime, maxDelta, Time.fixedDeltaTime);
-                                    headRot.y += headRot.y > 180 ? -360 : headRot.y < -180 ? 360 : 0;
-                                    headRot.x += headRot.x > 180 ? -360 : headRot.x < -180 ? 360 : 0;
-                                    headRot.x = Mathf.Clamp(headRot.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
-
-
-                                }
-                                break;
-
-                        }
-
-                    }
-                    break;
-
-                case ViewInputModes.Retro:
-                    {
-                        yawPitchInput = Vector2.up * (Input.GetAxis("Horizontal") * ((mouseInputInversion == MouseInputInversionModes.Y || mouseInputInversion == MouseInputInversionModes.Both) ? -1 : 1));
-                        Vector2 targetAngles = ((Vector2.right * playerCamera.transform.localEulerAngles.x) + (Vector2.up * transform.localEulerAngles.y));
-                        float fovMod = FOVSensitivityMultiplier > 0 && playerCamera.fieldOfView <= initialCameraFOV ? ((initialCameraFOV - playerCamera.fieldOfView) * (FOVSensitivityMultiplier / 10)) + 1 : 1;
-                        targetAngles = targetAngles + (yawPitchInput * ((inputSensitivity / fovMod)));
-                        targetAngles.x = 0;
-                        //playerCamera.transform.localEulerAngles = (Vector3.right * targetAngles.x) + (Vector3.forward * (enableHeadbob ? headbobCameraPosition.z : 0));
-                        playerCamera.transform.localEulerAngles = (Vector3.right * targetAngles.x) + (Vector3.forward);
-                        transform.localEulerAngles = (Vector3.up * targetAngles.y);
-                    }
-                    break;
-            }
-
-        }
-        public void RotateView(Vector3 AbsoluteEulerAngles, bool SmoothRotation)
-        {
-
-            switch (cameraPerspective)
-            {
-
-                case (PerspectiveModes._1stPerson):
-                    {
-                        AbsoluteEulerAngles.x += AbsoluteEulerAngles.x > 180 ? -360 : AbsoluteEulerAngles.x < -180 ? 360 : 0;
-                        AbsoluteEulerAngles.x = Mathf.Clamp(AbsoluteEulerAngles.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
-
-
-                        if (SmoothRotation)
-                        {
-                            IEnumerator SmoothRot()
-                            {
-                                //doingCamInterp = true;
-                                Vector3 refVec = Vector3.zero, targetAngles = (Vector3.right * playerCamera.transform.localEulerAngles.x) + Vector3.up * transform.eulerAngles.y;
-                                while (Vector3.Distance(targetAngles, AbsoluteEulerAngles) > 0.1f)
-                                {
-                                    targetAngles = Vector3.SmoothDamp(targetAngles, AbsoluteEulerAngles, ref refVec, 25 * Time.deltaTime);
-                                    targetAngles.x += targetAngles.x > 180 ? -360 : targetAngles.x < -180 ? 360 : 0;
-                                    targetAngles.x = Mathf.Clamp(targetAngles.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
-                                    playerCamera.transform.localEulerAngles = Vector3.right * targetAngles.x;
-                                    transform.eulerAngles = Vector3.up * targetAngles.y;
-                                    yield return null;
-                                }
-                                //doingCamInterp = false;
-                            }
-                            StopCoroutine("SmoothRot");
-                            StartCoroutine(SmoothRot());
-                        }
-                        else
-                        {
-                            playerCamera.transform.eulerAngles = Vector3.right * AbsoluteEulerAngles.x;
-                            transform.eulerAngles = (Vector3.up * AbsoluteEulerAngles.y) + (Vector3.forward * AbsoluteEulerAngles.z);
-                        }
-                    }
-                    break;
-
-                case (PerspectiveModes._3rdPerson):
-                    {
-                        if (SmoothRotation)
-                        {
-                            AbsoluteEulerAngles.y += AbsoluteEulerAngles.y > 180 ? -360 : AbsoluteEulerAngles.y < -180 ? 360 : 0;
-                            AbsoluteEulerAngles.x += AbsoluteEulerAngles.x > 180 ? -360 : AbsoluteEulerAngles.x < -180 ? 360 : 0;
-                            AbsoluteEulerAngles.x = Mathf.Clamp(AbsoluteEulerAngles.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
-                            IEnumerator SmoothRot()
-                            {
-                                //doingCamInterp = true;
-                                Vector3 refVec = Vector3.zero;
-                                while (Vector3.Distance(headRot, AbsoluteEulerAngles) > 0.1f)
-                                {
-                                    headPos = p_Rigidbody.position + Vector3.up * standingEyeHeight;
-                                    quatHeadRot = Quaternion.Euler(headRot);
-                                    headRot = Vector3.SmoothDamp(headRot, AbsoluteEulerAngles, ref refVec, 25 * Time.deltaTime);
-                                    headRot.y += headRot.y > 180 ? -360 : headRot.y < -180 ? 360 : 0;
-                                    headRot.x += headRot.x > 180 ? -360 : headRot.x < -180 ? 360 : 0;
-                                    headRot.x = Mathf.Clamp(headRot.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
-                                    yield return null;
-                                }
-                                //doingCamInterp = false;
-                            }
-                            StopCoroutine("SmoothRot");
-                            StartCoroutine(SmoothRot());
-                        }
-                        else
-                        {
-                            headRot = AbsoluteEulerAngles;
-                            headRot.y += headRot.y > 180 ? -360 : headRot.y < -180 ? 360 : 0;
-                            headRot.x += headRot.x > 180 ? -360 : headRot.x < -180 ? 360 : 0;
-                            headRot.x = Mathf.Clamp(headRot.x, -0.5f * verticalRotationRange, 0.5f * verticalRotationRange);
-                            quatHeadRot = Quaternion.Euler(headRot);
-                            //if (doingCamInterp) { }
-                        }
-                    }
-                    break;
-            }
-        }
-        public void ChangePerspective(PerspectiveModes newPerspective = PerspectiveModes._1stPerson)
-        {
-            switch (newPerspective)
-            {
-                case PerspectiveModes._1stPerson:
-                    {
-                        StopCoroutine("SmoothRot");
-                        isInThirdPerson = false;
-                        isInFirstPerson = true;
-                        transform.eulerAngles = Vector3.up * headRot.y;
-                        playerCamera.transform.localPosition = Vector3.up * standingEyeHeight;
-                        playerCamera.transform.localEulerAngles = (Vector2)playerCamera.transform.localEulerAngles;
-                        cameraPerspective = newPerspective;
-                        if (_3rdPersonCharacterAnimator)
-                        {
-                            _3rdPersonCharacterAnimator.gameObject.SetActive(false);
-                        }
-                        /*if (_1stPersonCharacterAnimator)
-                        {
-                            _1stPersonCharacterAnimator.gameObject.SetActive(true);
-                        }*/
-                        /*if (crosshairImg && autoGenerateCrosshair)
-                        {
-                            crosshairImg.gameObject.SetActive(true);
-                        }
-                    }
-                    break;
-
-                case PerspectiveModes._3rdPerson:
-                    {
-                        StopCoroutine("SmoothRot");
-                        isInThirdPerson = true;
-                        isInFirstPerson = false;
-                        playerCamera.fieldOfView = initialCameraFOV;
-                        maxCameraDistInternal = maxCameraDistInternal == 0 ? capsule.radius * 2 : maxCameraDistInternal;
-                        currentCameraZ = -(maxCameraDistInternal * 0.85f);
-                        playerCamera.transform.localEulerAngles = (Vector2)playerCamera.transform.localEulerAngles;
-                        headRot.y = transform.eulerAngles.y;
-                        headRot.x = playerCamera.transform.eulerAngles.x;
-                        cameraPerspective = newPerspective;
-                        if (_3rdPersonCharacterAnimator)
-                        {
-                            _3rdPersonCharacterAnimator.gameObject.SetActive(true);
-                        }
-                        /*if (_1stPersonCharacterAnimator)
-                        {
-                            _1stPersonCharacterAnimator.gameObject.SetActive(false);
-                        }*/
-                        /*if (crosshairImg && autoGenerateCrosshair)
-                        {
-                            if (!showCrosshairIn3rdPerson)
-                            {
-                                crosshairImg.gameObject.SetActive(false);
-                            }
-                            else
-                            {
-                                crosshairImg.gameObject.SetActive(true);
-                            }
-                        }
-                    }
-                    break;
-            }
-        }
-        void FOVKick()
-        {
-            if (cameraPerspective == PerspectiveModes._1stPerson && FOVKickAmount > 0)
-            {
-                currentFOVMod = (!isIdle && isSprinting) ? initialCameraFOV + (FOVKickAmount * ((sprintingSpeed / walkingSpeed) - 1)) : initialCameraFOV;
-                if (!Mathf.Approximately(playerCamera.fieldOfView, currentFOVMod) && playerCamera.fieldOfView >= initialCameraFOV)
-                {
-                    playerCamera.fieldOfView = Mathf.SmoothDamp(playerCamera.fieldOfView, currentFOVMod, ref FOVKickVelRef, Time.deltaTime, 50);
-                }
-            }
-        }
-       /* void HeadbobCycleCalculator()
-        {
-            if (enableHeadbob)
-            {
-                if (!isIdle && currentGroundInfo.isGettingGroundInfo && !isSliding)
-                {
-                    headbobWarmUp = Mathf.MoveTowards(headbobWarmUp, 1, Time.deltaTime * 5);
-                    headbobCyclePosition += (_2DVelocity.magnitude) * (Time.deltaTime * (headbobSpeed / 10));
-
-                    headbobCameraPosition.x = (((Mathf.Sin(Mathf.PI * (2 * headbobCyclePosition + 0.5f))) * (headbobPower / 50))) * headbobWarmUp;
-                    headbobCameraPosition.y = ((Mathf.Abs((((Mathf.Sin(Mathf.PI * (2 * headbobCyclePosition))) * 0.75f)) * (headbobPower / 50))) * headbobWarmUp) + internalEyeHeight;
-                    headbobCameraPosition.z = ((Mathf.Sin(Mathf.PI * (2 * headbobCyclePosition))) * (ZTilt / 3)) * headbobWarmUp;
-                }
-                else
-                {
-                    headbobCameraPosition = Vector3.MoveTowards(headbobCameraPosition, Vector3.up * internalEyeHeight, Time.deltaTime / (headbobPower * 0.3f));
-                    headbobWarmUp = 0.1f;
-                }
-                playerCamera.transform.localPosition = (Vector2)headbobCameraPosition;
-                if (StepCycle > (headbobCyclePosition * 3)) { StepCycle = headbobCyclePosition + 0.5f; }
-            }
-        }*/
-        /*void UpdateCameraPosition_3rdPerson()
-        {
-
-            //Camera Obstacle Check
-            cameraObstCheck = new Ray(headPos + (quatHeadRot * (Vector3.forward * capsule.radius)), quatHeadRot * -Vector3.forward);
-            if (Physics.SphereCast(cameraObstCheck, 0.5f, out cameraObstResult, maxCameraDistInternal, cameraObstructionIgnore, QueryTriggerInteraction.Ignore))
-            {
-                currentCameraZ = -(Vector3.Distance(headPos, cameraObstResult.point) * 0.9f);
-
-            }
-            else
-            {
-                currentCameraZ = Mathf.SmoothDamp(currentCameraZ, -(maxCameraDistInternal * 0.85f), ref cameraZRef, Time.deltaTime, 10, Time.fixedDeltaTime);
-            }
-
-            //Debugging
-            if (enableMouseAndCameraDebugging)
-            {
-                Debug.Log(headRot);
-                Debug.DrawRay(cameraObstCheck.origin, cameraObstCheck.direction * maxCameraDistance, Color.red);
-                Debug.DrawRay(cameraObstCheck.origin, cameraObstCheck.direction * -currentCameraZ, Color.green);
-            }
-            currentCameraPos = headPos + (quatHeadRot * (Vector3.forward * currentCameraZ));
-            playerCamera.transform.position = currentCameraPos;
-            playerCamera.transform.rotation = quatHeadRot;
-        }
-
-        void UpdateBodyRotation_3rdPerson()
-        {
-            //if is moving, rotate capsule to match camera forward   //change button down to bool of isFiring or isTargeting
-            if (!isIdle && !isSliding && currentGroundInfo.isGettingGroundInfo)
-            {
-                transform.rotation = (Quaternion.Euler(0, Mathf.MoveTowardsAngle(p_Rigidbody.rotation.eulerAngles.y, (Mathf.Atan2(InputDir.x, InputDir.z) * Mathf.Rad2Deg), 10), 0));
-                //transform.rotation = Quaternion.Euler(0,Mathf.MoveTowardsAngle(transform.eulerAngles.y,(Mathf.Atan2(InputDir.x,InputDir.z)*Mathf.Rad2Deg),2.5f), 0);
-            }
-            else if (isSliding)
-            {
-                transform.localRotation = (Quaternion.Euler(Vector3.up * Mathf.MoveTowardsAngle(p_Rigidbody.rotation.eulerAngles.y, (Mathf.Atan2(p_Rigidbody.velocity.x, p_Rigidbody.velocity.z) * Mathf.Rad2Deg), 10)));
-            }
-            else if (!currentGroundInfo.isGettingGroundInfo && rotateCharacterToCameraForward)
-            {
-                transform.localRotation = (Quaternion.Euler(Vector3.up * Mathf.MoveTowardsAngle(p_Rigidbody.rotation.eulerAngles.y, headRot.y, 10)));
-            }
-        }*/
-        #endregion
+        
 
         #region Movement Functions
         void MovePlayer(Vector3 Direction, float Speed)
@@ -1038,6 +773,7 @@ namespace SUPERCharacte
 
             currentGroundInfo.groundFromSweep = Physics.SphereCastAll(transform.position, capsule.radius - 0.001f, Vector3.down, ((capsule.height / 2)) - (capsule.radius / 2), whatIsGround);
             currentGroundInfo.isInContactWithGround = Physics.Raycast(transform.position, Vector3.down, out currentGroundInfo.groundFromRay, (capsule.height / 2) + 0.25f, whatIsGround);
+            Debug.DrawRay(transform.position, Vector3.down, Color.red, (capsule.height / 2) + 0.25f);
 
             if (Jumped && (Physics.Raycast(transform.position, Vector3.down, (capsule.height / 2) + 0.1f, whatIsGround) || Physics.CheckSphere(transform.position - (Vector3.up * ((capsule.height / 2) - (capsule.radius - 0.05f))), capsule.radius, whatIsGround)) && Time.time > (jumpBlankingPeriod + 0.1f))
             {
@@ -1460,6 +1196,82 @@ namespace SUPERCharacte
         }
         #endregion
 
+        #region Survival Stat Functions
+        public void TickStats()
+        {
+            if (currentSurvivalStats.Hunger > 0)
+            {
+                currentSurvivalStats.Hunger = Mathf.Clamp(currentSurvivalStats.Hunger - (hungerDepletionRate + (isSprinting && !isIdle ? 0.1f : 0)), 0, defaultSurvivalStats.Hunger);
+                currentSurvivalStats.isStarving = (currentSurvivalStats.Hunger < (defaultSurvivalStats.Hunger / 10));
+            }
+            if (currentSurvivalStats.Hydration > 0)
+            {
+                currentSurvivalStats.Hydration = Mathf.Clamp(currentSurvivalStats.Hydration - (hydrationDepletionRate + (isSprinting && !isIdle ? 0.1f : 0)), 0, defaultSurvivalStats.Hydration);
+                currentSurvivalStats.isDehydrated = (currentSurvivalStats.Hydration < (defaultSurvivalStats.Hydration / 8));
+            }
+            currentSurvivalStats.hasLowHealth = (currentSurvivalStats.Health < (defaultSurvivalStats.Health / 10));
+
+            StatTickTimer = Time.time + (60 / statTickRate);
+        }
+        public void ImmediateStateChange(float Amount, StatSelector Stat = StatSelector.Health)
+        {
+            switch (Stat)
+            {
+                case StatSelector.Health:
+                    {
+                        currentSurvivalStats.Health = Mathf.Clamp(currentSurvivalStats.Health + Amount, 0, defaultSurvivalStats.Health);
+                        currentSurvivalStats.hasLowHealth = (currentSurvivalStats.Health < (defaultSurvivalStats.Health / 10));
+
+                    }
+                    break;
+
+                case StatSelector.Hunger:
+                    {
+                        currentSurvivalStats.Hunger = Mathf.Clamp(currentSurvivalStats.Hunger + Amount, 0, defaultSurvivalStats.Hunger);
+                        currentSurvivalStats.isStarving = (currentSurvivalStats.Hunger < (defaultSurvivalStats.Hunger / 10));
+                    }
+                    break;
+
+                case StatSelector.Hydration:
+                    {
+                        currentSurvivalStats.Hydration = Mathf.Clamp(currentSurvivalStats.Hydration + Amount, 0, defaultSurvivalStats.Hydration);
+                        currentSurvivalStats.isDehydrated = (currentSurvivalStats.Hydration < (defaultSurvivalStats.Hydration / 8));
+                    }
+                    break;
+            }
+        }
+        public void LevelUpStat(float newMaxStatLevel, StatSelector Stat = StatSelector.Health, bool Refill = true)
+        {
+            switch (Stat)
+            {
+                case StatSelector.Health:
+                    {
+                        defaultSurvivalStats.Health = Mathf.Clamp(newMaxStatLevel, 0, newMaxStatLevel); ;
+                        if (Refill) { currentSurvivalStats.Health = Mathf.Clamp(newMaxStatLevel, 0, newMaxStatLevel); }
+                        currentSurvivalStats.hasLowHealth = (currentSurvivalStats.Health < (defaultSurvivalStats.Health / 10));
+
+                    }
+                    break;
+                case StatSelector.Hunger:
+                    {
+                        defaultSurvivalStats.Hunger = Mathf.Clamp(newMaxStatLevel, 0, newMaxStatLevel); ;
+                        if (Refill) { currentSurvivalStats.Hunger = Mathf.Clamp(newMaxStatLevel, 0, newMaxStatLevel); }
+                        currentSurvivalStats.isStarving = (currentSurvivalStats.Hunger < (defaultSurvivalStats.Hunger / 10));
+
+                    }
+                    break;
+                case StatSelector.Hydration:
+                    {
+                        defaultSurvivalStats.Hydration = Mathf.Clamp(newMaxStatLevel, 0, newMaxStatLevel); ;
+                        if (Refill) { currentSurvivalStats.Hydration = Mathf.Clamp(newMaxStatLevel, 0, newMaxStatLevel); }
+                        currentSurvivalStats.isDehydrated = (currentSurvivalStats.Hydration < (defaultSurvivalStats.Hydration / 8));
+
+                    }
+                    break;
+            }
+        }
+
+        #endregion
 
         #region Animator Update
         void UpdateAnimationTriggers(bool zeroOut = false)
@@ -1473,6 +1285,204 @@ namespace SUPERCharacte
                             //Setup Fistperson animation triggers here.
 
                         }*/
+                        if (_3rdPersonCharacterAnimator)
+                        {
+                            if (stickRendererToCapsuleBottom)
+                            {
+                                _3rdPersonCharacterAnimator.transform.position = (Vector3.right * _3rdPersonCharacterAnimator.transform.position.x) + (Vector3.up * (transform.position.y - (capsule.height / 2))) + (Vector3.forward * _3rdPersonCharacterAnimator.transform.position.z);
+                            }
+                            if (!zeroOut)
+                            {
+                                //Setup Thirdperson animation triggers here.
+                                if (a_velocity != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_velocity, p_Rigidbody.velocity.sqrMagnitude);
+                                }
+                                if (a_2DVelocity != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_2DVelocity, _2DVelocity.magnitude);
+                                }
+                                if (a_Idle != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Idle, isIdle);
+                                }
+                                if (a_Sprinting != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Sprinting, isSprinting);
+                                }
+                                if (a_Crouching != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Crouching, isCrouching);
+                                }
+                                if (a_Sliding != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Sliding, isSliding);
+                                }
+                                if (a_Jumped != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Jumped, Jumped);
+                                }
+                                if (a_Grounded != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Grounded, currentGroundInfo.isInContactWithGround);
+                                }
+                                if (a_facon != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_facon, tengoFacon);
+                                }
+                                if (a_faconazo != "" && Input.GetKey(KeyCode.Mouse0) && !Jumped && !atacando && tengoFacon && !cubriendose && !controller.enMenuRadial)
+                                {
+                                    atacando = true;
+                                    p_Rigidbody.velocity = Vector3.zero;
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_faconazo);
+                                    InstantStaminaReduction(s_FacaStaminaDepletion);
+                                }
+                                if (a_esquivar != "" && Input.GetKey(KeyCode.Space) && !Jumped && !atacando && tengoFacon && !cubriendose)
+                                {
+                                    //Vector3 ultPos = transform.position;
+                                    //ultimaPosicion = ultPos;
+                                    atacando = true;
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_esquivar);
+                                    p_Rigidbody.velocity = Vector3.zero;
+                                    InstantStaminaReduction(s_FacaStaminaDepletion);
+                                }
+                                if (a_poncho != "" && Input.GetKeyDown(KeyCode.Mouse1) && !Jumped && !atacando && tengoFacon && !cubriendose)
+                                {
+                                    cubriendose = true;
+                                    _3rdPersonCharacterAnimator.SetBool(a_poncho, true);
+                                    p_Rigidbody.velocity = Vector3.zero;
+                                }
+                                if (Input.GetKeyUp(KeyCode.Mouse1) && cubriendose)
+                                {
+                                    cubriendose = false;
+                                    _3rdPersonCharacterAnimator.SetBool(a_poncho, false);
+                                }
+                                if (a_velXZ != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_velXZ, velXZ.magnitude);
+                                }
+                                if (a_rifle != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_rifle, tengoRifle);
+                                }
+                                if (a_boleadoras != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_boleadoras, tengoBoleadoras);
+                                }
+                                if (a_VelX != "" && tengoBoleadoras)
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_VelX, horizontal);
+                                }
+                                if (a_VelY != "" && tengoBoleadoras)
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_VelY, vertical);
+                                }
+                                if (a_lanzar != "" && tengoBoleadoras && Input.GetKey(KeyCode.Mouse0) && !controller.enMenuRadial)
+                                {
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_lanzar);
+                                }
+                                if (a_isDeath != "" && estaMuerto && !murio)
+                                {
+                                    murio = true;
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_isDeath);
+                                }
+
+                            }
+                            else
+                            {
+                                if (a_velocity != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_velocity, 0);
+                                }
+                                if (a_2DVelocity != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_2DVelocity, 0);
+                                }
+                                if (a_Idle != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Idle, true);
+                                }
+                                if (a_Sprinting != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Sprinting, false);
+                                }
+                                if (a_Crouching != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Crouching, false);
+                                }
+                                if (a_Sliding != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Sliding, false);
+                                }
+                                if (a_Jumped != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Jumped, false);
+                                }
+                                if (a_Grounded != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_Grounded, true);
+                                }
+                                if (a_facon != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_facon, false);
+                                }
+                                if (a_faconazo != "" && Input.GetKey(KeyCode.Mouse0) && !Jumped && !atacando && tengoFacon)
+                                {
+                                    p_Rigidbody.velocity = Vector3.zero;
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_faconazo);
+                                    atacando = true;
+                                    InstantStaminaReduction(s_FacaStaminaDepletion);
+                                }
+                                if (a_esquivar != "" && Input.GetKey(KeyCode.Space) && !Jumped && !atacando && tengoFacon)
+                                {
+                                    atacando = true;
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_esquivar);
+                                    p_Rigidbody.velocity = Vector3.zero;
+                                    InstantStaminaReduction(s_FacaStaminaDepletion);
+                                }
+                                if (a_poncho != "" && Input.GetKeyDown(KeyCode.Mouse1) && !Jumped && !atacando && tengoFacon && !cubriendose)
+                                {
+                                    cubriendose = true;
+                                    _3rdPersonCharacterAnimator.SetBool(a_poncho, true);
+                                    p_Rigidbody.velocity = Vector3.zero;
+                                }
+                                if (Input.GetKeyUp(KeyCode.Mouse1) && cubriendose)
+                                {
+                                    cubriendose = false;
+                                    _3rdPersonCharacterAnimator.SetBool(a_poncho, false);
+                                }
+                                if (a_velXZ != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_velXZ, 0);
+                                }
+                                if (a_rifle != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_rifle, false);
+                                }
+                                if (a_boleadoras != "")
+                                {
+                                    _3rdPersonCharacterAnimator.SetBool(a_boleadoras, false);
+                                }
+                                if (a_VelX != "" && tengoBoleadoras)
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_VelX, 0);
+                                }
+                                if (a_VelY != "" && tengoBoleadoras)
+                                {
+                                    _3rdPersonCharacterAnimator.SetFloat(a_VelY, 0);
+                                }
+                                if (a_lanzar != "" && tengoBoleadoras && Input.GetKey(KeyCode.Mouse0) && !controller.enMenuRadial)
+                                {
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_lanzar);
+                                }
+                                if (a_isDeath != "" && estaMuerto && !murio)
+                                {
+                                    _3rdPersonCharacterAnimator.SetTrigger(a_isDeath);
+                                }
+                            }
+
+                        }
+
                     }
                     break;
 
@@ -1804,6 +1814,7 @@ namespace SUPERCharacte
         GUIStyle BoxPanel;
         Texture2D BoxPanelColor;
         JuanMoveBehaviour t;
+        CamaraBahaviour s;
         SerializedObject tSO, SurvivalStatsTSO;
         SerializedProperty interactableLayer, obstructionMaskField, groundLayerMask, groundMatProf, defaultSurvivalStats, currentSurvivalStats;
         static bool cameraSettingsFoldout = false, movementSettingFoldout = false, survivalStatsFoldout, footStepFoldout = false;
@@ -1811,6 +1822,7 @@ namespace SUPERCharacte
         public void OnEnable()
         {
             t = (JuanMoveBehaviour)target;
+            //s = (CamaraBahaviour)target;
             tSO = new SerializedObject(t);
             SurvivalStatsTSO = new SerializedObject(t);
             obstructionMaskField = tSO.FindProperty("cameraObstructionIgnore");
@@ -1835,89 +1847,13 @@ namespace SUPERCharacte
             BoxPanel = BoxPanel != null ? BoxPanel : new GUIStyle(GUI.skin.box) { normal = { background = BoxPanelColor } };
             #endregion
 
-            /*  #region PlaymodeWarning
-              if (Application.isPlaying)
-              {
-                  EditorGUILayout.HelpBox("It is recommended you switch to another Gameobject's inspector, Updates to this inspector panel during playmode can cause lag in the rigidbody calculations and cause unwanted adverse effects to gameplay. \n\n Please note this is NOT an issue in application builds.", MessageType.Warning);
-              }
-              #endregion*/
-
-            /*#region Label  
-            EditorGUILayout.Space();
-            //Label A
-            //GUILayout.Label("<b><i><size=16><color=#B2F9CF>S</color><color=#F9B2DC>U</color><color=#CFB2F9>P</color><color=#B2F9F3>E</color><color=#F9CFB2>R</color></size></i><size=12>Character Controller</size></b>",l_scriptHeaderStyle,GUILayout.ExpandWidth(true));
-
-            //Label B
-            //GUILayout.Label("<b><i><size=16><color=#3FB8AF>S</color><color=#7FC7AF>U</color><color=#DAD8A7>P</color><color=#FF9E9D>E</color><color=#FF3D7F>R</color></size></i><size=12>Character Controller</size></b>",l_scriptHeaderStyle,GUILayout.ExpandWidth(true));
-
-            //Label C 
-      
-            //GUILayout.Label("<b><i><size=18><color=#FC80A5>S</color><color=#FFFF9F>U</color><color=#99FF99>P</color><color=#76D7EA>E</color><color=#BF8FCC>R</color></size></i></b> <size=12><i>Character Controller</i></size>", l_scriptHeaderStyle, GUILayout.ExpandWidth(true));
-            EditorGUILayout.LabelField("", GUI.skin.horizontalSlider, GUILayout.MaxHeight(6)); EditorGUILayout.Space();
-            #endregion*/
+           
             t.controller = (Controller)EditorGUILayout.ObjectField(new GUIContent("Player", "The "), t.controller, typeof(Controller), true);
             //t.posCamera = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Posicion Camara", "The "), t.posCamera, typeof(GameObject), true);
             t.speed = EditorGUILayout.Slider(new GUIContent("", ""), t.speed, 0.0f, 10.0f);
             t.speedRotate = EditorGUILayout.Slider(new GUIContent("", ""), t.speedRotate, 50.0f, 300.0f);
 
-            #region Camera Settings
-            /*GUILayout.Label("Camera Settings", labelHeaderStyle, GUILayout.ExpandWidth(true));
-            EditorGUILayout.Space();
-            EditorGUILayout.BeginVertical(BoxPanel);
-            t.enableCameraControl = EditorGUILayout.ToggleLeft(new GUIContent("Enable Camera Control", "Should the player have control over the camera?"), t.enableCameraControl);
-            t.playerCamera = (Camera)EditorGUILayout.ObjectField(new GUIContent("Player Camera", "The Camera Attached to the Player."), t.playerCamera, typeof(Camera), true);
-            //t.cameraPerspective = (PerspectiveModes)EditorGUILayout.EnumPopup(new GUIContent("Camera Perspective Mode", "The current perspective of the character."), t.cameraPerspective);
-            //if(t.cameraPerspective == PerspectiveModes._3rdPerson){EditorGUILayout.HelpBox("3rd Person perspective is currently very experimental. Bugs and other adverse effects may occur.",MessageType.Info);}
-
-            //EditorGUI.indentLevel--;
-
-            if (cameraSettingsFoldout)
-            {
-                t.automaticallySwitchPerspective = EditorGUILayout.ToggleLeft(new GUIContent("Automatically Switch Perspective", "Should the Camera perspective mode automatically change based on the distance between the camera and the character's head?"), t.automaticallySwitchPerspective);
-/*#if ENABLE_INPUT_SYSTEM
-            t.perspectiveSwitchingKey = (Key)EditorGUILayout.EnumPopup(new GUIContent("Perspective Switch Key", "The keyboard key used to switch perspective modes. Set to none if you do not wish to allow perspective switching"),t.perspectiveSwitchingKey);
-#else
-                if (!t.automaticallySwitchPerspective) { t.perspectiveSwitchingKey_L = (KeyCode)EditorGUILayout.EnumPopup(new GUIContent("Perspective Switch Key", "The keyboard key used to switch perspective modes. Set to none if you do not wish to allow perspective switching"), t.perspectiveSwitchingKey_L); }
-#endif*/
-                /*t.mouseInputInversion = (MouseInputInversionModes)EditorGUILayout.EnumPopup(new GUIContent("Mouse Input Inversion", "Which axes of the mouse input should be inverted if any?"), t.mouseInputInversion);
-                t.Sensitivity = EditorGUILayout.Slider(new GUIContent("Mouse Sensitivity", "Sensitivity of the mouse"), t.Sensitivity, 1, 20);
-                t.rotationWeight = EditorGUILayout.Slider(new GUIContent("Camera Weight", "How heavy should the camera feel?"), t.rotationWeight, 1, 25);
-                t.verticalRotationRange = EditorGUILayout.Slider(new GUIContent("Vertical Rotation Range", "The vertical angle range (In degrees) that the camera is allowed to move in"), t.verticalRotationRange, 1, 180);
-
-                t.lockAndHideMouse = EditorGUILayout.ToggleLeft(new GUIContent("Lock and Hide mouse Cursor", "Should the controller lock and hide the cursor?"), t.lockAndHideMouse);
-                t.autoGenerateCrosshair = EditorGUILayout.ToggleLeft(new GUIContent("Auto Generate Crosshair", "Should the controller automatically generate a crosshair?"), t.autoGenerateCrosshair);
-                GUI.enabled = t.autoGenerateCrosshair;
-                t.crosshairSprite = (Sprite)EditorGUILayout.ObjectField(new GUIContent("Crosshair Sprite", "The Sprite the controller will use when generating a crosshair."), t.crosshairSprite, typeof(Sprite), false, GUILayout.Height(EditorGUIUtility.singleLineHeight));
-                t.showCrosshairIn3rdPerson = EditorGUILayout.ToggleLeft(new GUIContent("Show Crosshair in 3rd person?", "Should the controller show the crosshair in 3rd person?"), t.showCrosshairIn3rdPerson);
-                GUI.enabled = true;
-                t.drawPrimitiveUI = EditorGUILayout.ToggleLeft(new GUIContent("Draw Primitive UI", "Should the controller automatically generate and draw primitive stat UI?"), t.drawPrimitiveUI);
-                EditorGUILayout.Space(20);
-
-                if (t.cameraPerspective == PerspectiveModes._1stPerson)
-                {
-                    t.viewInputMethods = (ViewInputModes)EditorGUILayout.EnumPopup(new GUIContent("Camera Input Methods", "The input method used to rotate the camera."), t.viewInputMethods);
-                    t.standingEyeHeight = EditorGUILayout.Slider(new GUIContent("Standing Eye Height", "The Eye height of the player measured from the center of the character's capsule and upwards."), t.standingEyeHeight, 0, 1);
-                    t.crouchingEyeHeight = EditorGUILayout.Slider(new GUIContent("Crouching Eye Height", "The Eye height of the player measured from the center of the character's capsule and upwards."), t.crouchingEyeHeight, 0, 1);
-                    t.FOVKickAmount = EditorGUILayout.Slider(new GUIContent("FOV Kick Amount", "How much should the camera's FOV change based on the current movement speed?"), t.FOVKickAmount, 0, 50);
-                    t.FOVSensitivityMultiplier = EditorGUILayout.Slider(new GUIContent("FOV Sensitivity Multiplier", "How much should the camera's FOV effect the mouse sensitivity? (Lower FOV = less sensitive)"), t.FOVSensitivityMultiplier, 0, 1);
-                }
-                else
-                {
-                    t.rotateCharacterToCameraForward = EditorGUILayout.ToggleLeft(new GUIContent("Rotate Ungrounded Character to Camera Forward", "Should the character get rotated towards the camera's forward facing direction when mid air?"), t.rotateCharacterToCameraForward);
-                    t.standingEyeHeight = EditorGUILayout.Slider(new GUIContent("Head Height", "The Head height of the player measured from the center of the character's capsule and upwards."), t.standingEyeHeight, 0, 1);
-                    t.maxCameraDistance = EditorGUILayout.Slider(new GUIContent("Max Camera Distance", "The farthest distance the camera is allowed to hover from the character's head"), t.maxCameraDistance, 0, 15);
-                    t.cameraZoomSensitivity = EditorGUILayout.Slider(new GUIContent("Camera Zoom Sensitivity", "How sensitive should the mouse scroll wheel be when zooming the camera in and out?"), t.cameraZoomSensitivity, 1, 5);
-                    t.bodyCatchupSpeed = EditorGUILayout.Slider(new GUIContent("Body Mesh Alignment Speed", "How quickly will the body align itself with the camera's relative direction"), t.bodyCatchupSpeed, 0, 5);
-                    t.inputResponseFiltering = EditorGUILayout.Slider(new GUIContent("Input Response Filtering", "How quickly will the internal input direction align itself the player's input"), t.inputResponseFiltering, 0, 5);
-                    EditorGUILayout.PropertyField(obstructionMaskField, new GUIContent("Camera Obstruction Layers", "The Layers the camera will register as an obstruction and move in front of ."));
-                }
-            }
-            EditorGUILayout.Space();
-            cameraSettingsFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(cameraSettingsFoldout, cameraSettingsFoldout ? "<color=#B83C82>show less</color>" : "<color=#B83C82>show more</color>", ShowMoreStyle);
-            EditorGUILayout.EndFoldoutHeaderGroup();
-            EditorGUILayout.EndVertical();
-            if (GUI.changed) { EditorUtility.SetDirty(t); Undo.RecordObject(t, "Undo Camera Setting changes"); tSO.ApplyModifiedProperties(); }*/
-            #endregion
+           
 
             #region Movement Settings
 
@@ -2168,7 +2104,87 @@ namespace SUPERCharacte
 
             #endregion
 
+            #region Survival Stats
+            EditorGUILayout.Space(); EditorGUILayout.LabelField("", GUI.skin.horizontalSlider, GUILayout.MaxHeight(6)); EditorGUILayout.Space();
+            GUILayout.Label("Survival Stats", labelHeaderStyle, GUILayout.ExpandWidth(true));
+            EditorGUILayout.Space(10);
 
+            SurvivalStatsTSO = new SerializedObject(t);
+            defaultSurvivalStats = SurvivalStatsTSO.FindProperty("defaultSurvivalStats");
+            currentSurvivalStats = SurvivalStatsTSO.FindProperty("currentSurvivalStats");
+
+            #region Basic settings
+            EditorGUILayout.BeginVertical(BoxPanel);
+            GUILayout.Label("<color=grey>Basic Settings</color>", labelSubHeaderStyle, GUILayout.ExpandWidth(true));
+            t.enableSurvivalStats = EditorGUILayout.ToggleLeft(new GUIContent("Enable Survival Stats", "Should the controller enable it's survival systems?"), t.enableSurvivalStats);
+            GUI.enabled = t.enableSurvivalStats;
+            t.statTickRate = EditorGUILayout.Slider(new GUIContent("Stat Ticks Per-minute", "How many times per-minute should the stats do a tick update? Each tick depletes/regenerates the stats by their respective rates below."), t.statTickRate, 0.1f, 20.0f);
+            #endregion
+            if (survivalStatsFoldout)
+            {
+
+                #region Health Settings
+                GUILayout.Label("<color=grey>Health Settings</color>", labelSubHeaderStyle, GUILayout.ExpandWidth(true));
+                EditorGUILayout.BeginVertical(BoxPanel);
+                SerializedProperty statHP = defaultSurvivalStats.FindPropertyRelative("Health"), currentStatHP = currentSurvivalStats.FindPropertyRelative("Health");
+
+                //preview bar
+                Rect casingRectHP = EditorGUILayout.GetControlRect(), statRectHP = new Rect(casingRectHP.x + 2, casingRectHP.y + 2, Mathf.Clamp(((casingRectHP.width / statHP.floatValue) * currentStatHP.floatValue) - 4, 0, casingRectHP.width), casingRectHP.height - 4);
+                EditorGUI.DrawRect(casingRectHP, statBackingColor);
+                EditorGUI.DrawRect(statRectHP, new Color32(211, 0, 0, (byte)(GUI.enabled ? 191 : 64)));
+
+                EditorGUILayout.PropertyField(statHP, new GUIContent("Health Points", "How much health does the controller start with?"));
+
+                GUI.enabled = false;
+                EditorGUILayout.ToggleLeft(new GUIContent("Health is critically low?"), currentSurvivalStats.FindPropertyRelative("hasLowHealth").boolValue);
+                GUI.enabled = t.enableSurvivalStats;
+                EditorGUILayout.EndVertical();
+                #endregion
+
+                #region Hunger Settings
+                GUILayout.Label("<color=grey>Hunger Settings</color>", labelSubHeaderStyle, GUILayout.ExpandWidth(true));
+                EditorGUILayout.BeginVertical(BoxPanel);
+                SerializedProperty statHU = defaultSurvivalStats.FindPropertyRelative("Hunger"), currentStatHU = currentSurvivalStats.FindPropertyRelative("Hunger");
+
+                //preview bar
+                Rect casingRectHU = EditorGUILayout.GetControlRect(), statRectHU = new Rect(casingRectHU.x + 2, casingRectHU.y + 2, Mathf.Clamp(((casingRectHU.width / statHU.floatValue) * currentStatHU.floatValue) - 4, 0, casingRectHU.width), casingRectHU.height - 4);
+                EditorGUI.DrawRect(casingRectHU, statBackingColor);
+                EditorGUI.DrawRect(statRectHU, new Color32(142, 54, 0, (byte)(GUI.enabled ? 191 : 64)));
+
+                EditorGUILayout.PropertyField(statHU, new GUIContent("Hunger Points", "How much Hunger does the controller start with?"));
+                t.hungerDepletionRate = EditorGUILayout.Slider(new GUIContent("Hunger Depletion Per Tick", "How much does hunger deplete per tick?"), t.hungerDepletionRate, 0, 5);
+                GUI.enabled = false;
+                EditorGUILayout.ToggleLeft(new GUIContent("Player is Starving?"), currentSurvivalStats.FindPropertyRelative("isStarving").boolValue);
+                GUI.enabled = t.enableSurvivalStats;
+                EditorGUILayout.EndVertical();
+                #endregion
+
+                #region Hydration Settings
+                GUILayout.Label("<color=grey>Hydration Settings</color>", labelSubHeaderStyle, GUILayout.ExpandWidth(true));
+                EditorGUILayout.BeginVertical(BoxPanel);
+                SerializedProperty statHY = defaultSurvivalStats.FindPropertyRelative("Hydration"), currentStatHY = currentSurvivalStats.FindPropertyRelative("Hydration");
+
+                //preview bar
+                Rect casingRectHY = EditorGUILayout.GetControlRect(), statRectHY = new Rect(casingRectHY.x + 2, casingRectHY.y + 2, Mathf.Clamp(((casingRectHY.width / statHY.floatValue) * currentStatHY.floatValue) - 4, 0, casingRectHY.width), casingRectHY.height - 4);
+                EditorGUI.DrawRect(casingRectHY, statBackingColor);
+                EditorGUI.DrawRect(statRectHY, new Color32(0, 194, 255, (byte)(GUI.enabled ? 191 : 64)));
+
+                EditorGUILayout.PropertyField(statHY, new GUIContent("Hydration Points", "How much Hydration does the controller start with?"));
+                t.hydrationDepletionRate = EditorGUILayout.Slider(new GUIContent("Hydration Depletion Per Tick", "How much does hydration deplete per tick?"), t.hydrationDepletionRate, 0, 5);
+                GUI.enabled = false;
+                EditorGUILayout.ToggleLeft(new GUIContent("Player is Dehydrated?"), currentSurvivalStats.FindPropertyRelative("isDehydrated").boolValue);
+                GUI.enabled = t.enableSurvivalStats;
+                EditorGUILayout.EndVertical();
+                #endregion
+            }
+            EditorGUILayout.Space();
+            survivalStatsFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(survivalStatsFoldout, survivalStatsFoldout ? "<color=#B83C82>show less</color>" : "<color=#B83C82>show more</color>", ShowMoreStyle);
+            EditorGUILayout.EndFoldoutHeaderGroup();
+            EditorGUILayout.EndVertical();
+
+            GUI.enabled = true;
+            if (GUI.changed) { EditorUtility.SetDirty(t); Undo.RecordObject(t, "Undo Survival Stat Setting changes"); tSO.ApplyModifiedProperties(); }
+            #endregion
 
             #region Animation Triggers
             EditorGUILayout.Space(); EditorGUILayout.LabelField("", GUI.skin.horizontalSlider, GUILayout.MaxHeight(6)); EditorGUILayout.Space();
