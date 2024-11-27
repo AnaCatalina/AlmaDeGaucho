@@ -356,7 +356,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: -361, y: -241}
+  m_AnchoredPosition: {x: -361, y: -185}
   m_SizeDelta: {x: 1193.415, y: 224.613}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &234428299
@@ -379,7 +379,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "D\xEDa Grande"
+  m_text: ALMA DE GAUCHO
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4b6ab512ebe96ac47bf5dc6e2a3f8510, type: 2}
   m_sharedMaterial: {fileID: 7177563949923871566, guid: 4b6ab512ebe96ac47bf5dc6e2a3f8510, type: 2}
@@ -442,7 +442,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 108.579926, z: 407.90775, w: -79.23369}
+  m_margin: {x: 0, y: 108.579926, z: 58.394165, w: -79.23369}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -1356,7 +1356,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1189125554
 RectTransform:
   m_ObjectHideFlags: 0
