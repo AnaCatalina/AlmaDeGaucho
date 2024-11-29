@@ -46,16 +46,16 @@ public class CinematicaBehaviour : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            DetenerCinemática();
+            DetenerCinematica();
         }
     }
 
     public void CheckOver(VideoPlayer vp)
     {
-        DetenerCinemática();
+        DetenerCinematica();
     }
 
-    public void DetenerCinemática()
+    public void DetenerCinematica()
     {
         textoPanel.SetActive (true);
         foreach (AudioSource sonidos in audios)
