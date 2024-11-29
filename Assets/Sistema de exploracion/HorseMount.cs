@@ -40,7 +40,7 @@ public class HorseMount : MonoBehaviour
         float distanceToPlayer = Vector3.Distance(transform.position, player.position);
 
         // Montar el caballo
-        if (distanceToPlayer <= mountDistance && Input.GetKeyDown(KeyCode.E) && !isMounted && !playerMovement.tengoBoleadoras && !playerMovement.tengoFacon && playerMovement.isIdle)
+        if (distanceToPlayer <= mountDistance && Input.GetKeyDown(KeyCode.E) && !isMounted && !playerMovement.tengoBoleadoras && !playerMovement.tengoFacon && playerMovement.isIdle && playerMovement.currentGroundInfo.isInContactWithGround)
         {
             MountHorse();
             playerController.puedoUsarMenu = false;

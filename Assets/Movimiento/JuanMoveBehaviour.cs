@@ -41,6 +41,12 @@ namespace SUPERCharacte
         public bool estaMuerto;
         public bool murio;
 
+        #region Boleadoras
+        public GameObject boleadoraPrefab;  // Prefab del objeto a lanzar
+        public Transform lanzamientoPos;    // Empty en la mano del jugador
+        public float fuerzaLanzamiento = 15f;
+        #endregion
+
         #region Movimiento2
         public float speed = 5f;
         public float speedRotate = 200f;
@@ -48,74 +54,6 @@ namespace SUPERCharacte
         public float vertical;
         #endregion
 
-        #region Camera Settings
-        /*[Header("Camera Settings")]
-        //
-        //Public
-        //
-        //Both
-        public Camera playerCamera;
-        public bool enableCameraControl = true, lockAndHideMouse = true, autoGenerateCrosshair = true, showCrosshairIn3rdPerson = false, drawPrimitiveUI = false;
-        public Sprite crosshairSprite;
-        public PerspectiveModes cameraPerspective = PerspectiveModes._3rdPerson;
-        //use mouse wheel to switch modes. (too close will set it to fps mode and attempting to zoom out from fps will switch to tps mode)
-        public bool automaticallySwitchPerspective = true;
-/*#if ENABLE_INPUT_SYSTEM
-    public Key perspectiveSwitchingKey = Key.Q;
-#else
-        public KeyCode perspectiveSwitchingKey_L = KeyCode.None;
-#endif*/
-
-        /*public MouseInputInversionModes mouseInputInversion;
-        public float Sensitivity = 8;
-        public float rotationWeight = 4;
-        public float verticalRotationRange = 170.0f;
-        public float standingEyeHeight = 0.8f;
-        public float crouchingEyeHeight = 0.25f;
-
-        //First person
-        public ViewInputModes viewInputMethods;
-        public float FOVKickAmount = 10;
-        public float FOVSensitivityMultiplier = 0.74f;
-
-        //Third Person
-        public bool rotateCharacterToCameraForward = false;
-        public float maxCameraDistance = 8;
-        public LayerMask cameraObstructionIgnore = -1;
-        public float cameraZoomSensitivity = 5;
-        public float bodyCatchupSpeed = 2.5f;
-        public float inputResponseFiltering = 2.5f;
-
-
-
-        //
-        //Internal
-        //
-
-        //Both
-        Vector2 MouseXY;
-        Vector2 viewRotVelRef;
-        bool isInFirstPerson, isInThirdPerson, perspecTog;
-        bool setInitialRot = true;
-        Vector3 initialRot;
-        Image crosshairImg;
-        Image stamMeter, stamMeterBG;
-        Image statsPanel, statsPanelBG;
-        Image HealthMeter, HydrationMeter, HungerMeter;
-        Vector2 normalMeterSizeDelta = new Vector2(175, 12), normalStamMeterSizeDelta = new Vector2(330, 5);
-        float internalEyeHeight;
-
-        //First Person
-        float initialCameraFOV, FOVKickVelRef, currentFOVMod;
-
-        //Third Person
-        float mouseScrollWheel, maxCameraDistInternal, currentCameraZ, cameraZRef;
-        Vector3 headPos, headRot, currentCameraPos, cameraPosVelRef;
-        Quaternion quatHeadRot;
-        Ray cameraObstCheck;
-        RaycastHit cameraObstResult;
-        [Space(20)]*/
-        #endregion
 
         #region Movement
         [Header("Movement Settings")]
@@ -269,61 +207,6 @@ namespace SUPERCharacte
             murio = false;
 
 
-
-            #region Camera
-            /*maxCameraDistInternal = maxCameraDistance;
-            initialCameraFOV = playerCamera.fieldOfView;
-            internalEyeHeight = standingEyeHeight;
-            if (lockAndHideMouse)
-            {
-                Cursor.lockState = CursorLockMode.Locked;
-                Cursor.visible = false;
-            }
-
-            if (autoGenerateCrosshair || drawPrimitiveUI)
-            {
-                Canvas canvas = playerCamera.gameObject.GetComponentInChildren<Canvas>();
-                if (canvas == null) { canvas = new GameObject("AutoCrosshair").AddComponent<Canvas>(); }
-                canvas.gameObject.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-                canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-                canvas.pixelPerfect = true;
-                canvas.transform.SetParent(playerCamera.transform);
-                canvas.transform.position = Vector3.zero;
-                if (autoGenerateCrosshair && crosshairSprite)
-                {
-                    crosshairImg = new GameObject("Crosshair").AddComponent<Image>();
-                    crosshairImg.sprite = crosshairSprite;
-                    crosshairImg.rectTransform.sizeDelta = new Vector2(25, 25);
-                    crosshairImg.transform.SetParent(canvas.transform);
-                    crosshairImg.transform.position = Vector3.zero;
-                    crosshairImg.raycastTarget = false;
-                }
-                if (drawPrimitiveUI)
-                {
-                    //Stam Meter BG
-                    stamMeterBG = new GameObject("Stam BG").AddComponent<Image>();
-                    stamMeterBG.rectTransform.sizeDelta = normalStamMeterSizeDelta;
-                    stamMeterBG.transform.SetParent(canvas.transform);
-                    stamMeterBG.rectTransform.anchorMin = new Vector2(0.5f, 0);
-                    stamMeterBG.rectTransform.anchorMax = new Vector2(0.5f, 0);
-                    stamMeterBG.rectTransform.anchoredPosition = new Vector2(0, 22);
-                    stamMeterBG.color = Color.gray;
-                    stamMeterBG.gameObject.SetActive(enableStaminaSystem);
-                    //Stam Meter
-                    stamMeter = new GameObject("Stam Meter").AddComponent<Image>();
-                    stamMeter.rectTransform.sizeDelta = normalStamMeterSizeDelta;
-                    stamMeter.transform.SetParent(canvas.transform);
-                    stamMeter.rectTransform.anchorMin = new Vector2(0.5f, 0);
-                    stamMeter.rectTransform.anchorMax = new Vector2(0.5f, 0);
-                    stamMeter.rectTransform.anchoredPosition = new Vector2(0, 22);
-                    stamMeter.color = Color.white;
-                    stamMeter.gameObject.SetActive(enableStaminaSystem);
-
-                }
-            }
-            initialRot = transform.localEulerAngles;*/
-            #endregion
-
             #region Movement
             p_Rigidbody = GetComponent<Rigidbody>();
             //capsule = GetComponent<CapsuleCollider>();
@@ -414,90 +297,7 @@ namespace SUPERCharacte
 
                     if (!tengoBoleadoras)
                     {
-                        #region Camera
-                        /*if (enableCameraControl)
-                        {
-                            switch (cameraPerspective)
-                            {
-                                case PerspectiveModes._1stPerson:
-                                    {
-                                        //This is called in FixedUpdate for the 3rd person mode
-                                        //RotateView(MouseXY, Sensitivity, rotationWeight);
-                                        if (!isInFirstPerson) { ChangePerspective(PerspectiveModes._1stPerson); }
-                                        if (perspecTog || (automaticallySwitchPerspective && mouseScrollWheel < 0)) { ChangePerspective(PerspectiveModes._3rdPerson); }
-                                        //HeadbobCycleCalculator();
-                                        FOVKick();
-                                    }
-                                    break;
-
-                                case PerspectiveModes._3rdPerson:
-                                    {
-                                        //  UpdateCameraPosition_3rdPerson();
-                                        if (!isInThirdPerson) { ChangePerspective(PerspectiveModes._3rdPerson); }
-                                        if (perspecTog || (automaticallySwitchPerspective && maxCameraDistInternal == 0 && currentCameraZ == 0)) { ChangePerspective(PerspectiveModes._1stPerson); }
-                                        maxCameraDistInternal = Mathf.Clamp(maxCameraDistInternal - (mouseScrollWheel * (cameraZoomSensitivity * 2)), automaticallySwitchPerspective ? 0 : (capsule.radius * 2), maxCameraDistance);
-                                    }
-                                    break;
-                            }
-
-
-                            if (setInitialRot)
-                            {
-                                setInitialRot = false;
-                                RotateView(initialRot, false);
-                                InputDir = transform.forward;
-                            }
-                        }
-                        if (drawPrimitiveUI)
-                        {
-                            /* if (enableSurvivalStats)
-                             {
-                                 if (!statsPanel.gameObject.activeSelf) statsPanel.gameObject.SetActive(true);
-
-                                 HealthMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (currentSurvivalStats.Health / defaultSurvivalStats.Health));
-                                 HydrationMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (currentSurvivalStats.Hydration / defaultSurvivalStats.Hydration));
-                                 HungerMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 12, normalMeterSizeDelta, (currentSurvivalStats.Hunger / defaultSurvivalStats.Hunger));
-                             }
-                             else
-                             {
-                                 if (statsPanel.gameObject.activeSelf) statsPanel.gameObject.SetActive(false);
-
-                             } */
-                            /*if (enableStaminaSystem)
-                            {
-                                if (!stamMeterBG.gameObject.activeSelf) stamMeterBG.gameObject.SetActive(true);
-                                if (!stamMeter.gameObject.activeSelf) stamMeter.gameObject.SetActive(true);
-                                if (staminaIsChanging)
-                                {
-                                    if (stamMeter.color != Color.white)
-                                    {
-                                        stamMeterBG.color = Vector4.MoveTowards(stamMeterBG.color, new Vector4(0, 0, 0, 0.5f), 0.15f);
-                                        stamMeter.color = Vector4.MoveTowards(stamMeter.color, new Vector4(1, 1, 1, 1), 0.15f);
-                                    }
-                                    stamMeter.rectTransform.sizeDelta = Vector2.Lerp(Vector2.up * 5, normalStamMeterSizeDelta, (currentStaminaLevel / Stamina));
-                                }
-                                else
-                                {
-                                    if (stamMeter.color != Color.clear)
-                                    {
-                                        stamMeterBG.color = Vector4.MoveTowards(stamMeterBG.color, new Vector4(0, 0, 0, 0), 0.15f);
-                                        stamMeter.color = Vector4.MoveTowards(stamMeter.color, new Vector4(0, 0, 0, 0), 0.15f);
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (stamMeterBG.gameObject.activeSelf) stamMeterBG.gameObject.SetActive(false);
-                                if (stamMeter.gameObject.activeSelf) stamMeter.gameObject.SetActive(false);
-                            }
-                        }
-
-                        if (currentStance == Stances.Standing && !changingStances)
-                        {
-                            internalEyeHeight = standingEyeHeight;
-                        }*/
-                        #endregion
-
+                        
                         //if(Input.GetKeyDown(KeyCode.Mouse0))
                         if (!atacando && !cubriendose)
                         {
@@ -565,15 +365,6 @@ namespace SUPERCharacte
 
                     }
 
-                    #region Camera
-                    /*RotateView(MouseXY, Sensitivity, rotationWeight);
-                    if (cameraPerspective == PerspectiveModes._3rdPerson)
-                    {
-                        UpdateBodyRotation_3rdPerson();
-                        UpdateCameraPosition_3rdPerson();
-                    }
-                    */
-                    #endregion
                 }
                 else
                 {
@@ -1853,7 +1644,12 @@ namespace SUPERCharacte
             t.speed = EditorGUILayout.Slider(new GUIContent("", ""), t.speed, 0.0f, 10.0f);
             t.speedRotate = EditorGUILayout.Slider(new GUIContent("", ""), t.speedRotate, 50.0f, 300.0f);
 
-           
+            t.boleadoraPrefab = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Prefab Boleadoras",
+                "Referencia al prefab de las boleadoras que se van a lanzar"), t.boleadoraPrefab, typeof(GameObject), true);
+            t.lanzamientoPos = (Transform)EditorGUILayout.ObjectField(new GUIContent("Posición de lanxamiento",
+                "Referencia a la posicion de dónde salen lanzadas las boleadoras"), t.lanzamientoPos, typeof(Transform), true);
+            t.fuerzaLanzamiento = EditorGUILayout.Slider(new GUIContent("Fuerza de Lanzamiento", ""), t.fuerzaLanzamiento, 1.0f, 30.0f);
+
 
             #region Movement Settings
 
