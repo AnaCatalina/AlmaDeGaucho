@@ -22,6 +22,9 @@ public class EntityBehaviourScript : MonoBehaviour
             Die();
         }
     }
+    public virtual void TakeDamage2()
+    {
+    }
 
     protected virtual void Die()
     {
