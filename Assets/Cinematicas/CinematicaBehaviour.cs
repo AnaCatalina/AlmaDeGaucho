@@ -9,8 +9,9 @@ public class CinematicaBehaviour : MonoBehaviour
 {
     public VideoPlayer cinematica_1;
 
-    public Transform puntoControl;
-    public GameObject juan;
+    public GameObject textoPanel;
+    //public Transform puntoControl;
+    //public GameObject juan;
 
     public Transform player;
     private JuanMoveBehaviour playerMovement;
@@ -19,6 +20,7 @@ public class CinematicaBehaviour : MonoBehaviour
 
     void Awake()
     {
+        textoPanel.SetActive(false);
         cinematica_1 = GetComponent<VideoPlayer>();
         cinematica_1.Play();
         cinematica_1.loopPointReached += CheckOver;
@@ -36,12 +38,21 @@ public class CinematicaBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            DetenerCinemática();
+        }
     }
 
     public void CheckOver(VideoPlayer vp)
     {
-        juan.transform.position = puntoControl.transform.position;
+        DetenerCinemática();
+    }
+
+    public void DetenerCinemática()
+    {
+        textoPanel.SetActive (true);
+        //juan.transform.position = puntoControl.transform.position;
         playerMovement.enabled = true;
         playerMovement.atacando = false;
         playerController.enabled = true;

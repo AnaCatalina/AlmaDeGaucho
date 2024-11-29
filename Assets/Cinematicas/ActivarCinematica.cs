@@ -7,6 +7,8 @@ using UnityEngine.UI;
 
 public class ActivarCinematica : MonoBehaviour
 {
+    public int numCinematica;
+    public MisionesBehaviour misiones;
     public RawImage cinematica2;
 
     public Transform player;
@@ -33,13 +35,33 @@ public class ActivarCinematica : MonoBehaviour
     {
         if (other.CompareTag("Player") && primeraVez)
         {
-            Debug.Log("CINEMATICA");
+            ActivarSiguienteCinematica(numCinematica);
+            //Debug.Log("CINEMATICA");
             playerController.enabled = false;
             playerMovement.atacando = true;
             //playerMovement.enabled = false;
             camaraJugador.enabled = false;
             cinematica2.gameObject.SetActive(true);
-            primeraVez = false;
+            gameObject.SetActive(false);
+            //primeraVez = false;
+        }
+    }
+
+    public void ActivarSiguienteCinematica(int numCinematica)
+    {
+        switch (numCinematica)
+        {
+            case 2:
+                {
+                    misiones.HabilitarCinematica3();
+                    misiones.CambiarMensaje(numCinematica);
+                    break;
+                }
+            case 3:
+                {
+                    misiones.CambiarMensaje(numCinematica);
+                    break;
+                }
         }
     }
 }
