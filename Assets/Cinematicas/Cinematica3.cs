@@ -12,7 +12,7 @@ public class Cinematica3 : MonoBehaviour
 
     public Transform puntoControl;
     public GameObject juan;
-
+    public AudioSource[] audios;
     public Transform player;
     private JuanMoveBehaviour playerMovement;
     private Controller playerController;
@@ -21,6 +21,10 @@ public class Cinematica3 : MonoBehaviour
     void Awake()
     {
         textoPanel.SetActive(false);
+        foreach (AudioSource sonidos in audios)
+        {
+            sonidos.enabled = false;
+        }
         cinematica_1 = GetComponent<VideoPlayer>();
         cinematica_1.Play();
         cinematica_1.loopPointReached += CheckOver;
@@ -51,6 +55,10 @@ public class Cinematica3 : MonoBehaviour
     public void DetenerCinematica()
     {
         textoPanel.SetActive(true);
+        foreach (AudioSource sonidos in audios)
+        {
+            sonidos.enabled = true;
+        }
         juan.transform.position = puntoControl.transform.position;
         playerMovement.enabled = true;
         playerMovement.atacando = false;
