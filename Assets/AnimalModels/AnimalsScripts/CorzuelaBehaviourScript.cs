@@ -12,7 +12,7 @@ public class CorzuelaBehaviourScript : AnimalBehaviourScript
     private bool isFleeing = false;
 
     private bool isStunned = false;
-    private bool isPatrol = false;
+    //private bool isPatrol = false;
     public float stunDuration = 5f; // Duraciom stun
 
     protected override void Start()

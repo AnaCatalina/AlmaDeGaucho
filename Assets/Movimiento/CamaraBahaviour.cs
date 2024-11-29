@@ -26,6 +26,10 @@ namespace CamaraTerceraPersona
         private JuanMoveBehaviour moveBehaviour;
 
         public Transform arcoPivot;  // Empty que servirá como centro del arco
+        /*public float arcoRadio = 2f;  // Distancia de la cámara al pivot
+        public float anguloVerticalActual = 0f;  // Ángulo actual en grados
+        public float limiteSuperior = 60f;
+        public float limiteInferior = -30f;*/
 
         #region Render Trayectoria
         public LineRenderer lineRenderer;
@@ -300,7 +304,8 @@ namespace CamaraTerceraPersona
                             internalEyeHeight = standingEyeHeight;
                         }
                         #endregion
-
+                        //MoverCamaraEnArco(Input.GetAxis("Mouse Y"));
+                        lineRenderer.enabled = false;
                     }
                     else
                     {
@@ -342,10 +347,25 @@ namespace CamaraTerceraPersona
         {
             float angulo = pitchInput * Sensitivity;
             posCamera.transform.RotateAround(arcoPivot.position, transform.right, angulo);
+
+            // Limitar la rotación vertical para evitar que se descontrole
+            float anguloActual = Vector3.SignedAngle(arcoPivot.forward, posCamera.transform.forward, transform.right);
+            float limiteSuperior = 60f;  // Define el límite superior
+            float limiteInferior = -30f; // Define el límite inferior
+
+            if (anguloActual > limiteSuperior)
+            {
+                posCamera.transform.RotateAround(arcoPivot.position, transform.right, limiteSuperior - anguloActual);
+            }
+            else if (anguloActual < limiteInferior)
+            {
+                posCamera.transform.RotateAround(arcoPivot.position, transform.right, limiteInferior - anguloActual);
+            }
         }
 
         public void DibujarTrayectoria(Vector3 origen, Vector3 velocidadInicial)
         {
+            lineRenderer.enabled = true;  // Activar el LineRenderer
             lineRenderer.positionCount = puntosTrayectoria;
             for (int i = 0; i < puntosTrayectoria; i++)
             {

@@ -369,6 +369,7 @@ namespace SUPERCharacte
                 else
                 {
                     MovePlayer();
+                    //camaraPro.MoverCamaraEnArco(Input.GetAxis("Mouse Y"));
                     //transform.forward = Camera.main.transform.forward;
                 }
 
@@ -1608,7 +1609,7 @@ namespace SUPERCharacte
         CamaraBahaviour s;
         SerializedObject tSO, SurvivalStatsTSO;
         SerializedProperty interactableLayer, obstructionMaskField, groundLayerMask, groundMatProf, defaultSurvivalStats, currentSurvivalStats;
-        static bool cameraSettingsFoldout = false, movementSettingFoldout = false, survivalStatsFoldout, footStepFoldout = false;
+        static bool /*cameraSettingsFoldout = false,*/ movementSettingFoldout = false, survivalStatsFoldout, footStepFoldout = false;
 
         public void OnEnable()
         {
