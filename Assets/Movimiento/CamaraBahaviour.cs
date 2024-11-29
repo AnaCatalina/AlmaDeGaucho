@@ -25,6 +25,12 @@ namespace CamaraTerceraPersona
         public GameObject posCamera;
         private JuanMoveBehaviour moveBehaviour;
 
+        public Transform arcoPivot;  // Empty que servirá como centro del arco
+
+        #region Render Trayectoria
+        public LineRenderer lineRenderer;
+        public int puntosTrayectoria = 50;
+        #endregion
 
         #region Camera Settings F
         [Header("Camera Settings")]
@@ -296,6 +302,12 @@ namespace CamaraTerceraPersona
                         #endregion
 
                     }
+                    else
+                    {
+                        Vector3 velocidad = playerCamera.transform.forward * moveBehaviour.fuerzaLanzamiento;
+                        //MoverCamaraEnArco(Input.GetAxis("Mouse Y"));
+                        DibujarTrayectoria(moveBehaviour.lanzamientoPos.position, velocidad);
+                    }
 
                     
                 }
@@ -317,7 +329,29 @@ namespace CamaraTerceraPersona
 
                     #endregion
                 }
+                else
+                {
+                    //MoverCamaraEnArco(Input.GetAxis("Mouse Y"));
+                }
+                
 
+            }
+        }
+
+        public void MoverCamaraEnArco(float pitchInput)
+        {
+            float angulo = pitchInput * Sensitivity;
+            posCamera.transform.RotateAround(arcoPivot.position, transform.right, angulo);
+        }
+
+        public void DibujarTrayectoria(Vector3 origen, Vector3 velocidadInicial)
+        {
+            lineRenderer.positionCount = puntosTrayectoria;
+            for (int i = 0; i < puntosTrayectoria; i++)
+            {
+                float t = i / (float)puntosTrayectoria;
+                Vector3 punto = origen + velocidadInicial * t + 0.5f * Physics.gravity * t * t;
+                lineRenderer.SetPosition(i, punto);
             }
         }
 
@@ -675,6 +709,12 @@ namespace CamaraTerceraPersona
 
             t.posCamera = (GameObject)EditorGUILayout.ObjectField(new GUIContent("Posicion Camara(conBoleadoras)",
                 "Referencia a la ubicación en la que estara la cámara CUANDO esté equipada las boleadoras"), t.posCamera, typeof(GameObject), true);
+
+            t.arcoPivot = (Transform)EditorGUILayout.ObjectField(new GUIContent("Pivot Cámara(conBoleadoras)",
+                "Referencia a la ubicación del Pivot de la cámara CUANDO esté equipada las boleadoras"), t.arcoPivot, typeof(Transform), true);
+
+            t.lineRenderer = (LineRenderer)EditorGUILayout.ObjectField(new GUIContent("Line Render",
+                "R"), t.lineRenderer, typeof(LineRenderer), true);
 
             #region Camera Settings F
             GUILayout.Label("Camera Settings", labelHeaderStyle, GUILayout.ExpandWidth(true));

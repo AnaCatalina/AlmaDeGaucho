@@ -42,7 +42,7 @@ public class CarpinchoBehaviourScript : AnimalBehaviourScript
 
         if (patrolPoints.Count == 0)
         {
-            Debug.LogWarning("No patrol points assigned!");
+            //Debug.LogWarning("No patrol points assigned!");
             return;
         }
 
@@ -52,7 +52,7 @@ public class CarpinchoBehaviourScript : AnimalBehaviourScript
 
     void Update()
     {
-        Debug.Log("destino "+ agent.destination);
+        //Debug.Log("destino "+ agent.destination);
         if (!isFleeing && !isStunned)
         {
             animator.SetBool("isWalking", false);
