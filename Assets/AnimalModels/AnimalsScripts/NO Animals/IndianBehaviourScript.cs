@@ -6,6 +6,7 @@ using UnityEngine.AI;
 public class IndianBehaviourScript : EnemyBehaviourScript
 {
     private Transform player;
+    
     public float detectionRadius = 10.0f;
     public float attackRadius = 2f; // rango de ataque
     public float stopDistance = 3f; // distancia a la que se detendrá antes de atacar
@@ -20,10 +21,13 @@ public class IndianBehaviourScript : EnemyBehaviourScript
     public Transform[] pointsPatrol;
     private int currentPosition;
 
+    //public Animator animEnemy;
+
     // Start is called before the first frame update
     protected override void Start()
     {
         base.Start();
+        //animEnemy = GetComponent<Animator>();
         GameObject playerObject = GameObject.FindGameObjectWithTag("Player");
         if (playerObject != null)
         {
@@ -45,50 +49,59 @@ public class IndianBehaviourScript : EnemyBehaviourScript
     // Update is called once per frame
     void Update()
     {
-        if (player == null || agent == null)
+        if (!isDead)
         {
-            return;
-        }
-
-        if (agent.remainingDistance < 0.1) //este if lo agrege recien
-        {
-            currentPosition = Random.Range(0, pointsPatrol.Length);
-            animator.SetBool("isMove", true);
-            agent.isStopped = false;
-            agent.SetDestination(pointsPatrol[currentPosition].position);
-        }
-
-        float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-
-        // dentro del radio de detección se acerca
-        if (distanceToPlayer < detectionRadius && distanceToPlayer > stopDistance && !ataco)
-        {
-            //isAttacking = false; 
-            animator.SetBool("isMove", true);
-            MoveTowardsPlayer();
-        }
-        else if (distanceToPlayer <= stopDistance)// se detiene a cierta distancia del jugador y ataca
-        {
-            agent.isStopped = true; 
-            if (distanceToPlayer <= attackRadius && !ataco/*&& !isAttacking*/)
+            if (player == null || agent == null)
             {
-                ataco = true;
-                isAttacking = true;
-                animator.SetBool("isMove", false);
-                animator.SetTrigger("atack");
-                //StartCoroutine(AttackPlayer());
+                return;
             }
+
+            if (agent.remainingDistance < 0.1) //este if lo agrege recien
+            {
+                currentPosition = Random.Range(0, pointsPatrol.Length);
+                animator.SetBool("isMove", true);
+                agent.isStopped = false;
+                agent.SetDestination(pointsPatrol[currentPosition].position);
+            }
+
+            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+
+            // dentro del radio de detección se acerca
+            if (distanceToPlayer < detectionRadius && distanceToPlayer > stopDistance && !ataco)
+            {
+                //isAttacking = false; 
+                animator.SetBool("isMove", true);
+                MoveTowardsPlayer();
+            }
+            else if (distanceToPlayer <= stopDistance)// se detiene a cierta distancia del jugador y ataca
+            {
+                agent.isStopped = true;
+                if (distanceToPlayer <= attackRadius && !ataco/*&& !isAttacking*/)
+                {
+                    ataco = true;
+                    isAttacking = true;
+                    animator.SetBool("isMove", false);
+                    animator.SetTrigger("atack");
+                    //StartCoroutine(AttackPlayer());
+                }
+            }
+            else
+            {
+                // se detiene si el jugador está fuera del rango de detección
+                isAttacking = false;
+                //agent.isStopped = true;  
+                //animator.SetBool("isMove", false);
+                animator.SetBool("isMove", true);
+                agent.SetDestination(pointsPatrol[currentPosition].position); //esto tambien lo agrege recien
+            }
+            animator.SetBool("attack", isAttacking);
         }
         else
         {
-            // se detiene si el jugador está fuera del rango de detección
-            isAttacking = false;
-            //agent.isStopped = true;  
-            //animator.SetBool("isMove", false);
-            animator.SetBool("isMove", true);
-            agent.SetDestination(pointsPatrol[currentPosition].position); //esto tambien lo agrege recien
+            animator.SetTrigger("isDead");
+            isDead = false;
         }
-        animator.SetBool("attack", isAttacking);
+        
     }
 
     private void MoveTowardsPlayer()

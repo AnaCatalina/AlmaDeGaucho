@@ -9,6 +9,9 @@ public class CinematicaBehaviour : MonoBehaviour
 {
     public VideoPlayer cinematica_1;
 
+    public Transform puntoControl;
+    public GameObject juan;
+
     public Transform player;
     private JuanMoveBehaviour playerMovement;
     private Controller playerController;
@@ -38,6 +41,7 @@ public class CinematicaBehaviour : MonoBehaviour
 
     public void CheckOver(VideoPlayer vp)
     {
+        juan.transform.position = puntoControl.transform.position;
         playerMovement.enabled = true;
         playerMovement.atacando = false;
         playerController.enabled = true;

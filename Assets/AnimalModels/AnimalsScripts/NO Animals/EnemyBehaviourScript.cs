@@ -12,17 +12,25 @@ public class EnemyBehaviourScript : EntityBehaviourScript
     public GameObject itemPrefab2;
     public NavMeshAgent agent;
 
+    
+    public bool isDead;
+
     protected override void Start()
     {
         base.Start();
+        
+        isDead = false;
         agent = GetComponent<NavMeshAgent>();
     }
-    public override void TakeDamage(float damage)
+    public override void TakeDamage2()
     {
-        health -= damage;
+        health -= 10f;
         if (health <= 0)
         {
-            Die();
+            isDead = true;
+            Debug.Log("murió el indio");
+            Destroy(gameObject,10f);
+            //Die();
         }
 
     }

@@ -51,7 +51,7 @@ public class CorzuelaBehaviourScript : AnimalBehaviourScript
 
     void Update()
     {
-        Debug.Log("destino " + agent.destination);
+        //Debug.Log("destino " + agent.destination);
         if (!isFleeing && !isStunned)
         {
             //animator.SetBool("isWalking", false);
