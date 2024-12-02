@@ -16,7 +16,8 @@ public class MovementHorse : MonoBehaviour
     public float jumpForce = 5f;
     #endregion
 
-    private Rigidbody rb;
+    
+    public Rigidbody rb;
     private Animator animator;
 
     private float currentSpeed;
