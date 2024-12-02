@@ -76,6 +76,7 @@ public class HorseMount : MonoBehaviour
         agent.enabled = false;
         followNavMesh.enabled = false;
         movementHorse.enabled = true;
+        movementHorse.rb.isKinematic = false;
         //camaraJugador.playerCamera = camaraJugador.horseCamera;
         //camaraJugador.pCamera.enabled = false;
         //camaraJugador.horseCamera.enabled = true;
@@ -105,5 +106,6 @@ public class HorseMount : MonoBehaviour
 
         // Colocar al player al lado del caballo al desmontar
         player.position = transform.position + transform.right * 2 + transform.up * 2;
+        movementHorse.rb.isKinematic = true;
     }
 }
